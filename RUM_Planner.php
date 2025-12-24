@@ -1184,6 +1184,17 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
               </div>
             </div>
 
+            <div class="summary-grid" style="margin-top:12px">
+              <div class="summary-card">
+                <h4>Partidas generales (fase)</h4>
+                <ul id="phaseSummary"></ul>
+              </div>
+              <div class="summary-card">
+                <h4>Partidas generales (trade)</h4>
+                <ul id="tradeSummary"></ul>
+              </div>
+            </div>
+
             <div class="chart-grid" style="margin-top:12px">
               <div class="chart-card">
                 <h3>S-Curve (PV / EV / AC)</h3>
@@ -1422,6 +1433,149 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       return String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
     }
     function clamp(n,min,max){ return Math.max(min, Math.min(max,n)); }
+
+    function formatDateISO(date){
+      const y = date.getFullYear();
+      const m = String(date.getMonth()+1).padStart(2,'0');
+      const d = String(date.getDate()).padStart(2,'0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function mexicoHolidays(year){
+      return [
+        `${year}-01-01`,
+        `${year}-02-05`,
+        `${year}-03-21`,
+        `${year}-05-01`,
+        `${year}-09-16`,
+        `${year}-11-18`,
+        `${year}-12-25`,
+      ];
+    }
+
+    function parseNonWorkingDates(){
+      const raw = String(document.getElementById('nonWorkingDays')?.value || '');
+      const parts = raw.split(/[\n,]+/).map(s=>s.trim()).filter(Boolean);
+      return new Set(parts);
+    }
+
+    function isNonWorking(date, nonWorkingSet, weekendsOff){
+      const day = date.getDay();
+      const iso = formatDateISO(date);
+      if (nonWorkingSet.has(iso)) return true;
+      if (weekendsOff && (day === 0 || day === 6)) return true;
+      return false;
+    }
+
+    function nextWorkingDate(date, nonWorkingSet, weekendsOff){
+      const d = new Date(date);
+      while (isNonWorking(d, nonWorkingSet, weekendsOff)){
+        d.setDate(d.getDate() + 1);
+      }
+      return d;
+    }
+
+    function addWorkingDays(startDate, workDays, nonWorkingSet, weekendsOff){
+      let current = new Date(startDate);
+      let count = 0;
+      while (count < workDays){
+        if (!isNonWorking(current, nonWorkingSet, weekendsOff)){
+          count += 1;
+          if (count === workDays) break;
+        }
+        current.setDate(current.getDate() + 1);
+      }
+      return current;
+    }
+
+    function daysBetween(startDate, endDate){
+      const ms = 24 * 60 * 60 * 1000;
+      const start = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+      const end = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
+      return Math.round((end - start) / ms);
+    }
+
+    function normalizeTaskUnits(task, fromWeeks){
+      if (!fromWeeks) return task;
+      const start = Number(task.start||1) * DAYS_PER_WEEK;
+      const dur = Math.max(1, Number(task.dur||1)) * DAYS_PER_WEEK;
+      const baselineStart = task.baselineStart ? Number(task.baselineStart) * DAYS_PER_WEEK : task.baselineStart;
+      const baselineDur = task.baselineDur ? Math.max(1, Number(task.baselineDur||1)) * DAYS_PER_WEEK : task.baselineDur;
+      return { ...task, start, dur, baselineStart, baselineDur };
+    }
+
+    function applyLoadedData(obj){
+      if (obj.mode) state.mode = obj.mode;
+      let fromWeeks = false;
+      if (Number.isFinite(obj.horizon_days)){
+        HORIZON_DAYS = Number(obj.horizon_days);
+      } else if (Number.isFinite(obj.horizonDays)){
+        HORIZON_DAYS = Number(obj.horizonDays);
+      } else if (Number.isFinite(obj.horizonWeeks)){
+        HORIZON_DAYS = Number(obj.horizonWeeks) * DAYS_PER_WEEK;
+        fromWeeks = true;
+      }
+      if (Array.isArray(obj.tasks)){
+        state.tasks = obj.tasks.map(t => normalizeTaskUnits(t, fromWeeks));
+      }
+      if (Array.isArray(obj.milestones)){
+        state.milestones = obj.milestones.map(m=>{
+          if (fromWeeks && Number.isFinite(m.week)){
+            return { ...m, day: Number(m.week) * DAYS_PER_WEEK };
+          }
+          return m;
+        });
+      }
+      state.procurement = Array.isArray(obj.procurement) ? obj.procurement : state.procurement;
+    }
+
+    function scheduleFromStartDate(){
+      const dateValue = document.getElementById('projectStartDate')?.value;
+      if (!dateValue) return toast('Selecciona una fecha de inicio', true);
+      const startDate = new Date(dateValue + 'T00:00:00');
+      const nonWorkingSet = parseNonWorkingDates();
+      const weekendsOff = document.getElementById('weekendsOff')?.checked ?? true;
+
+      const taskByWbs = new Map();
+      state.tasks.forEach(t=>taskByWbs.set(String(t.wbs||'').trim(), t));
+      const endDates = new Map();
+
+      const sorted = [...state.tasks].sort((a,b)=>Number(a.start||0) - Number(b.start||0));
+      sorted.forEach((t, index)=>{
+        let earliestDate = startDate;
+        const predKey = String(t.pred||'').trim();
+        if (predKey && taskByWbs.has(predKey)){
+          const predTask = taskByWbs.get(predKey);
+          const predEnd = endDates.get(predTask.id);
+          if (predEnd) {
+            earliestDate = new Date(predEnd);
+            earliestDate.setDate(earliestDate.getDate() + 1);
+          }
+        } else if (index > 0){
+          const prev = sorted[index - 1];
+          const prevEnd = endDates.get(prev.id);
+          if (prevEnd) {
+            earliestDate = new Date(prevEnd);
+            earliestDate.setDate(earliestDate.getDate() + 1);
+          }
+        }
+
+        const workStart = nextWorkingDate(earliestDate, nonWorkingSet, weekendsOff);
+        const workDays = Math.max(1, Number(t.dur||1));
+        const workEnd = addWorkingDays(workStart, workDays, nonWorkingSet, weekendsOff);
+        endDates.set(t.id, workEnd);
+
+        const startOffset = daysBetween(startDate, workStart) + 1;
+        const endOffset = daysBetween(startDate, workEnd) + 1;
+        t.start = Math.max(1, startOffset);
+        t.dur = Math.max(1, endOffset - startOffset + 1);
+      });
+
+      const maxEnd = Math.max(...Array.from(endDates.values()).map(d=>daysBetween(startDate, d) + 1), HORIZON_DAYS);
+      HORIZON_DAYS = clamp(maxEnd + 3, 10, 180);
+      refreshAll();
+      toast('Fechas recalculadas con días no laborables');
+    }
 
     function formatDateISO(date){
       const y = date.getFullYear();
@@ -2767,6 +2921,41 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
 
       window.__missingCost = state.tasks.filter(t=>Number(t.cost||0) <= 0).length;
       window.__missingWbs = state.tasks.filter(t=>!String(t.wbs||'').trim()).length;
+      window.__errorCostEl = document.getElementById('errorCost');
+      window.__errorWbsEl = document.getElementById('errorWbs');
+      if (window.__errorCostEl) {
+        window.__errorCostEl.textContent = `Error 01: ${window.__missingCost} actividades sin BAC`;
+        window.__errorCostEl.classList.toggle('is-active', window.__missingCost > 0);
+      }
+      if (window.__errorWbsEl) {
+        window.__errorWbsEl.textContent = `Error 02: ${window.__missingWbs} actividades sin WBS`;
+        window.__errorWbsEl.classList.toggle('is-active', window.__missingWbs > 0);
+      }
+
+      const phaseTotals = {};
+      const tradeTotals = {};
+      state.tasks.forEach(t=>{
+        const phase = t.phase || 'Sin fase';
+        const trade = t.trade || 'Sin trade';
+        const cost = Number(t.cost||0);
+        phaseTotals[phase] = (phaseTotals[phase]||0) + cost;
+        tradeTotals[trade] = (tradeTotals[trade]||0) + cost;
+      });
+      const phaseSummary = document.getElementById('phaseSummary');
+      const tradeSummary = document.getElementById('tradeSummary');
+      if (phaseSummary) {
+        phaseSummary.innerHTML = Object.entries(phaseTotals).map(([k,v])=>(
+          `<li><span>${escapeHtml(k)}</span><strong>${money(v)}</strong></li>`
+        )).join('') || '<li><span>Sin datos</span><strong>—</strong></li>';
+      }
+      if (tradeSummary) {
+        tradeSummary.innerHTML = Object.entries(tradeTotals).map(([k,v])=>(
+          `<li><span>${escapeHtml(k)}</span><strong>${money(v)}</strong></li>`
+        )).join('') || '<li><span>Sin datos</span><strong>—</strong></li>';
+      }
+
+      window.__missingCost = state.tasks.filter(t=>Number(t.cost||0) <= 0).length;
+      window.__missingWbs = state.tasks.filter(t=>!String(t.wbs||'').trim()).length;
       const errorCostEl = document.getElementById('errorCost');
       const errorWbsEl = document.getElementById('errorWbs');
       if (errorCostEl) {
@@ -3012,103 +3201,6 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
             x:{ ticks:{ autoSkip:false, callback: dayTick } },
             y:{ beginAtZero:true, suggestedMax: Math.max(pvMax, acMax) * 1.2 || 1 }
           }
-        }
-      });
-
-      // Daily cashflow (PV vs AC)
-      const ctxDaily = document.getElementById('chartDaily').getContext('2d');
-      if (chartDaily) chartDaily.destroy();
-      const pvMax = Math.max(...PV, 0);
-      const acMax = Math.max(...AC, 0);
-      chartDaily = new Chart(ctxDaily, {
-        type:'line',
-        data:{
-          labels,
-          datasets:[
-            { label:'PV diario', data: PV, tension:0.25, pointRadius:0, borderColor:'rgba(37,99,235,.9)' },
-            { label:'AC diario', data: AC, tension:0.25, pointRadius:0, borderColor:'rgba(220,38,38,.85)' }
-          ]
-        },
-        options:{
-          responsive:true,
-          maintainAspectRatio:false,
-          plugins:{ legend:{ labels:{ boxWidth:10, boxHeight:10 } } },
-          scales:{
-            x:{ ticks:{ autoSkip:false, callback: dayTick } },
-            y:{ beginAtZero:true, suggestedMax: Math.max(pvMax, acMax) * 1.2 || 1 }
-          }
-        }
-      });
-
-      // Daily cashflow (PV vs AC)
-      const ctxDaily = document.getElementById('chartDaily').getContext('2d');
-      if (chartDaily) chartDaily.destroy();
-      const pvMax = Math.max(...PV, 0);
-      const acMax = Math.max(...AC, 0);
-      chartDaily = new Chart(ctxDaily, {
-        type:'line',
-        data:{
-          labels,
-          datasets:[
-            { label:'PV diario', data: PV, tension:0.25, pointRadius:0, borderColor:'rgba(37,99,235,.9)' },
-            { label:'AC diario', data: AC, tension:0.25, pointRadius:0, borderColor:'rgba(220,38,38,.85)' }
-          ]
-        },
-        options:{
-          responsive:true,
-          maintainAspectRatio:false,
-          plugins:{ legend:{ labels:{ boxWidth:10, boxHeight:10 } } },
-          scales:{
-            x:{ ticks:{ autoSkip:false, callback: dayTick } },
-            y:{ beginAtZero:true, suggestedMax: Math.max(pvMax, acMax) * 1.2 || 1 }
-          }
-        }
-      });
-
-      // Cost by phase (bar)
-      const byPhase = {};
-      state.tasks.forEach(t=>{
-        const ph = t.phase || 'Sin fase';
-        byPhase[ph] = (byPhase[ph]||0) + Number(t.cost||0);
-      });
-      const phaseLabels = Object.keys(byPhase);
-      const phaseData = Object.values(byPhase);
-      const ctxPhase = document.getElementById('chartPhaseCost').getContext('2d');
-      if (chartPhaseCost) chartPhaseCost.destroy();
-      chartPhaseCost = new Chart(ctxPhase, {
-        type:'bar',
-        data:{ labels: phaseLabels, datasets:[{ label:'BAC', data: phaseData, backgroundColor:'rgba(37,99,235,.55)' }] },
-        options:{
-          responsive:true,
-          maintainAspectRatio:false,
-          plugins:{ legend:{ display:false } },
-          scales:{
-            x:{ ticks:{ autoSkip:false, maxRotation:45, minRotation:0 } },
-            y:{ beginAtZero:true, suggestedMax: Math.max(...phaseData, 1) * 1.2 }
-          }
-        }
-      });
-
-      // Status distribution
-      const byStatus = {};
-      state.tasks.forEach(t=>{
-        const status = t.status || 'Por liberar';
-        byStatus[status] = (byStatus[status]||0) + 1;
-      });
-      const ctxStatus = document.getElementById('chartStatus').getContext('2d');
-      if (chartStatus) chartStatus.destroy();
-      chartStatus = new Chart(ctxStatus, {
-        type:'doughnut',
-        data:{
-          labels: Object.keys(byStatus),
-          datasets:[{ data:Object.values(byStatus) }]
-        },
-        options:{
-          responsive:true,
-          maintainAspectRatio:true,
-          aspectRatio: 1.6,
-          cutout:'65%',
-          plugins:{ legend:{ position:'bottom' } }
         }
       });
 
