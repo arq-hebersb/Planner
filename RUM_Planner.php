@@ -1503,6 +1503,40 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       toast('Fechas recalculadas con días no laborables');
     }
 
+    function normalizeTaskUnits(task, fromWeeks){
+      if (!fromWeeks) return task;
+      const start = Number(task.start||1) * DAYS_PER_WEEK;
+      const dur = Math.max(1, Number(task.dur||1)) * DAYS_PER_WEEK;
+      const baselineStart = task.baselineStart ? Number(task.baselineStart) * DAYS_PER_WEEK : task.baselineStart;
+      const baselineDur = task.baselineDur ? Math.max(1, Number(task.baselineDur||1)) * DAYS_PER_WEEK : task.baselineDur;
+      return { ...task, start, dur, baselineStart, baselineDur };
+    }
+
+    function applyLoadedData(obj){
+      if (obj.mode) state.mode = obj.mode;
+      let fromWeeks = false;
+      if (Number.isFinite(obj.horizon_days)){
+        HORIZON_DAYS = Number(obj.horizon_days);
+      } else if (Number.isFinite(obj.horizonDays)){
+        HORIZON_DAYS = Number(obj.horizonDays);
+      } else if (Number.isFinite(obj.horizonWeeks)){
+        HORIZON_DAYS = Number(obj.horizonWeeks) * DAYS_PER_WEEK;
+        fromWeeks = true;
+      }
+      if (Array.isArray(obj.tasks)){
+        state.tasks = obj.tasks.map(t => normalizeTaskUnits(t, fromWeeks));
+      }
+      if (Array.isArray(obj.milestones)){
+        state.milestones = obj.milestones.map(m=>{
+          if (fromWeeks && Number.isFinite(m.week)){
+            return { ...m, day: Number(m.week) * DAYS_PER_WEEK };
+          }
+          return m;
+        });
+      }
+      state.procurement = Array.isArray(obj.procurement) ? obj.procurement : state.procurement;
+    }
+
     function toast(msg, bad=false){
       const el = document.getElementById('toast');
       el.textContent = msg;
@@ -1958,6 +1992,11 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       document.getElementById('errorCost').textContent = `Error 01: ${missingCost} actividades sin BAC`;
       document.getElementById('errorWbs').textContent = `Error 02: ${missingWbs} actividades sin WBS`;
 
+      const missingCost = state.tasks.filter(t=>Number(t.cost||0) <= 0).length;
+      const missingWbs = state.tasks.filter(t=>!String(t.wbs||'').trim()).length;
+      document.getElementById('errorCost').textContent = `Error 01: ${missingCost} actividades sin BAC`;
+      document.getElementById('errorWbs').textContent = `Error 02: ${missingWbs} actividades sin WBS`;
+
       const PV = seriesPV();
       const EV = seriesEV();
       const AC = seriesAC();
@@ -2108,6 +2147,77 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
           plugins:{ legend:{ labels:{ boxWidth:10, boxHeight:10 } } },
           scales:{
             x:{ ticks:{ autoSkip:false, callback: dayTick } },
+            y:{ beginAtZero:true, suggestedMax: Math.max(pvMax, acMax) * 1.2 || 1 }
+          }
+        }
+      });
+
+      // Cost by phase (bar)
+      const byPhase = {};
+      state.tasks.forEach(t=>{
+        const ph = t.phase || 'Sin fase';
+        byPhase[ph] = (byPhase[ph]||0) + Number(t.cost||0);
+      });
+      const phaseLabels = Object.keys(byPhase);
+      const phaseData = Object.values(byPhase);
+      const ctxPhase = document.getElementById('chartPhaseCost').getContext('2d');
+      if (chartPhaseCost) chartPhaseCost.destroy();
+      chartPhaseCost = new Chart(ctxPhase, {
+        type:'bar',
+        data:{ labels: phaseLabels, datasets:[{ label:'BAC', data: phaseData, backgroundColor:'rgba(37,99,235,.55)' }] },
+        options:{
+          responsive:true,
+          maintainAspectRatio:false,
+          plugins:{ legend:{ display:false } },
+          scales:{
+            x:{ ticks:{ autoSkip:false, maxRotation:45, minRotation:0 } },
+            y:{ beginAtZero:true, suggestedMax: Math.max(...phaseData, 1) * 1.2 }
+          }
+        }
+      });
+
+      // Status distribution
+      const byStatus = {};
+      state.tasks.forEach(t=>{
+        const status = t.status || 'Por liberar';
+        byStatus[status] = (byStatus[status]||0) + 1;
+      });
+      const ctxStatus = document.getElementById('chartStatus').getContext('2d');
+      if (chartStatus) chartStatus.destroy();
+      chartStatus = new Chart(ctxStatus, {
+        type:'doughnut',
+        data:{
+          labels: Object.keys(byStatus),
+          datasets:[{ data:Object.values(byStatus) }]
+        },
+        options:{
+          responsive:true,
+          maintainAspectRatio:false,
+          cutout:'65%',
+          plugins:{ legend:{ position:'bottom' } }
+        }
+      });
+
+      // Daily cashflow (PV vs AC)
+      const ctxDaily = document.getElementById('chartDaily').getContext('2d');
+      if (chartDaily) chartDaily.destroy();
+      const pvMax = Math.max(...PV, 0);
+      const acMax = Math.max(...AC, 0);
+      chartDaily = new Chart(ctxDaily, {
+        type:'line',
+        data:{
+          labels,
+          datasets:[
+            { label:'PV diario', data: PV, tension:0.25, pointRadius:0, borderColor:'rgba(37,99,235,.9)' },
+            { label:'AC diario', data: AC, tension:0.25, pointRadius:0, borderColor:'rgba(220,38,38,.85)' }
+          ]
+        },
+        options:{
+          responsive:true,
+          maintainAspectRatio:false,
+          plugins:{ legend:{ labels:{ boxWidth:10, boxHeight:10 } } },
+          scales:{
+            x:{ ticks:{ autoSkip:true, maxTicksLimit:12 } },
             y:{ beginAtZero:true, suggestedMax: Math.max(pvMax, acMax) * 1.2 || 1 }
           }
         }
