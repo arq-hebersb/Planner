@@ -32,16 +32,16 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       --rum-btn:#F6A868;
 
       --text-main:#0b1220;
-      --text-muted:#6b7280;
+      --text-muted:#4b5563;
 
-      --glass: rgba(255,255,255,.10);
-      --glass-2: rgba(255,255,255,.14);
-      --glass-border: rgba(255,255,255,.18);
+      --glass: rgba(255,255,255,.65);
+      --glass-2: rgba(255,255,255,.82);
+      --glass-border: rgba(17,24,39,.08);
 
-      --card: rgba(255,255,255,0.92);
-      --card-2: rgba(255,255,255,0.86);
-      --line: rgba(17,24,39,0.14);
-      --shadow: 0 18px 50px rgba(0,0,0,.35);
+      --card: #ffffff;
+      --card-2: #f8fafc;
+      --line: rgba(17,24,39,0.12);
+      --shadow: 0 20px 40px rgba(15,23,42,.12);
 
       --danger:#dc2626;
       --warn:#f59e0b;
@@ -53,14 +53,14 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
 .rum-planner-page{
       margin:0;
       font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      background: radial-gradient(circle at top, #222538 0, #05060a 55%);
-      color: #F4F2ED;
+      background: radial-gradient(circle at top, #ffffff 0, #eef2f7 60%);
+      color: var(--text-main);
       overflow-x:hidden;
     }
 .rum-planner-page a{ color:inherit; text-decoration:none; }
 
     /* Stars */
-    .stars-container{ position:fixed; inset:0; pointer-events:none; opacity:.65; }
+    .stars-container{ position:fixed; inset:0; pointer-events:none; opacity:.12; }
     .stars-container::before, .stars-container::after{
       content:"";
       position:absolute; inset:-20%;
@@ -92,7 +92,7 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       background: radial-gradient(circle at 30% 30%, rgba(0,191,255,.24), rgba(0,191,255,0) 60%),
                   radial-gradient(circle at 70% 70%, rgba(246,168,104,.18), rgba(246,168,104,0) 65%);
       filter: blur(0.2px);
-      opacity:.65;
+      opacity:.32;
       pointer-events:none;
       animation: floaty 10s ease-in-out infinite;
       mix-blend-mode: screen;
@@ -108,8 +108,11 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       position:relative;
       max-width: 1500px;
       margin: 0 auto;
-      padding: 22px 18px 70px;
+      padding: 22px 18px 90px;
       z-index:2;
+      display:flex;
+      flex-direction:column;
+      gap:16px;
     }
 
     .nav-wrap{
@@ -121,11 +124,11 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
     }
 
     .nav-fallback{
-      background: rgba(10,12,18,.55);
-      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.92);
+      border: 1px solid rgba(17,24,39,.10);
       border-radius: 16px;
       padding: 10px 14px;
-      box-shadow: 0 16px 40px rgba(0,0,0,.35);
+      box-shadow: 0 16px 40px rgba(15,23,42,.12);
       display:flex; align-items:center; justify-content:space-between;
     }
     .nav-fallback .brand{
@@ -135,8 +138,8 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       width:38px; height:38px; border-radius:12px;
       display:grid; place-items:center;
       font-weight:800;
-      background: linear-gradient(135deg, rgba(0,191,255,.35), rgba(246,168,104,.25));
-      border: 1px solid rgba(255,255,255,.15);
+      background: linear-gradient(135deg, rgba(59,130,246,.20), rgba(246,168,104,.18));
+      border: 1px solid rgba(17,24,39,.10);
     }
     .nav-fallback .ch{ font-family:"Baloo 2"; font-size:18px; }
     .nav-fallback .right{
@@ -159,7 +162,7 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
     }
     .page-head p{
       margin:6px 0 0;
-      color: rgba(244,242,237,.82);
+      color: var(--text-muted);
       max-width: 900px;
       line-height:1.4;
       font-size:14px;
@@ -168,10 +171,11 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
     .chip{
       padding: 8px 10px;
       border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(17,24,39,.12);
+      background: rgba(255,255,255,.9);
       font-size: 12px;
       white-space:nowrap;
+      color: #111827;
     }
 
     /* Cards layout */
@@ -188,10 +192,11 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
 
     .panel{
       border-radius: 18px;
-      background: rgba(10,12,18,.55);
-      border: 1px solid rgba(255,255,255,.14);
+      background: var(--card);
+      border: 1px solid var(--line);
       box-shadow: var(--shadow);
       overflow:hidden;
+      color: #111827;
     }
     .panel-header{
       display:flex;
@@ -199,8 +204,8 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       justify-content:space-between;
       gap:12px;
       padding: 14px 16px;
-      background: rgba(255,255,255,.06);
-      border-bottom: 1px solid rgba(255,255,255,.12);
+      background: #f8fafc;
+      border-bottom: 1px solid rgba(15,23,42,.08);
     }
     .panel-header h2{
       margin:0;
@@ -211,7 +216,7 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
     .panel-header p{
       margin:6px 0 0;
       font-size: 12px;
-      color: rgba(244,242,237,.78);
+      color: #4b5563;
       line-height: 1.35;
     }
     .panel-body{ padding: 14px 16px; }
@@ -224,9 +229,9 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
     }
 
     .btn{
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.10);
-      color: #F4F2ED;
+      border: 1px solid rgba(15,23,42,.14);
+      background: rgba(255,255,255,.9);
+      color: #111827;
       padding: 9px 12px;
       border-radius: 12px;
       font-weight: 700;
@@ -236,7 +241,7 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       user-select:none;
       white-space:nowrap;
     }
-    .btn:hover{ transform: translateY(-1px); border-color: rgba(255,255,255,.22); background: rgba(255,255,255,.14); }
+    .btn:hover{ transform: translateY(-1px); border-color: rgba(15,23,42,.22); background: #ffffff; }
     .btn:active{ transform: translateY(0); }
     .btn-primary{ background: rgba(42,109,176,.22); border-color: rgba(42,109,176,.38); }
     .btn-warn{ background: rgba(245,158,11,.18); border-color: rgba(245,158,11,.35); }
@@ -309,10 +314,10 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
 
     .pill-toggle{
       display:flex;
-      border:1px solid rgba(255,255,255,.18);
+      border:1px solid rgba(15,23,42,.12);
       border-radius: 999px;
       overflow:hidden;
-      background: rgba(255,255,255,.06);
+      background: #ffffff;
     }
     .pill-toggle button{
       border:none;
@@ -320,11 +325,11 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       font-weight: 800;
       font-size: 12px;
       cursor:pointer;
-      color:#F4F2ED;
+      color:#111827;
       background: transparent;
     }
     .pill-toggle button.active{
-      background: rgba(0,191,255,.18);
+      background: rgba(59,130,246,.18);
     }
 
     /* Task table */
@@ -332,35 +337,35 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       width:100%;
       overflow:auto;
       border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(15,23,42,.10);
+      background: #ffffff;
     }
-.rum-planner-page table{
+    .rum-planner-page table{
       width: 1700px;
       border-collapse: collapse;
       font-size: 12px;
-      color: #F4F2ED;
+      color: #111827;
     }
     thead th{
       position: sticky;
       top:0;
-      background: rgba(10,12,18,.85);
-      border-bottom: 1px solid rgba(255,255,255,.15);
+      background: #f8fafc;
+      border-bottom: 1px solid rgba(15,23,42,.12);
       padding: 10px 10px;
       text-align:left;
       white-space:nowrap;
       z-index:2;
     }
     tbody td{
-      border-bottom: 1px solid rgba(255,255,255,.10);
+      border-bottom: 1px solid rgba(15,23,42,.08);
       padding: 8px 10px;
       vertical-align: middle;
       white-space:nowrap;
     }
-    tbody tr:hover td{ background: rgba(255,255,255,.05); }
+    tbody tr:hover td{ background: rgba(15,23,42,.03); }
 
-    .sticky-col{ position: sticky; left:0; z-index:1; background: rgba(10,12,18,.88); }
-    .sticky-col-2{ position: sticky; left:110px; z-index:1; background: rgba(10,12,18,.88); }
+    .sticky-col{ position: sticky; left:0; z-index:1; background: #fff; }
+    .sticky-col-2{ position: sticky; left:110px; z-index:1; background: #fff; }
 
     .col-wbs{ width:110px; }
     .col-act{ width: 260px; }
@@ -410,16 +415,21 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
     }
 
     .ev-val{ font-weight: 900; }
-    .cv-neg{ color:#fecaca; font-weight:900; }
-    .cv-pos{ color:#bbf7d0; font-weight:900; }
+    .cv-neg{ color:#b91c1c; font-weight:900; }
+    .cv-pos{ color:#15803d; font-weight:900; }
 
     /* Charts */
     .chart-card{
-      background: rgba(255,255,255,.06);
-      border: 1px solid rgba(255,255,255,.14);
+      background: #ffffff;
+      border: 1px solid rgba(15,23,42,.10);
       border-radius: 16px;
       padding: 12px;
       overflow:hidden;
+      color:#111827;
+      min-height: 260px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
     }
     .chart-card h3{
       margin:0 0 10px;
@@ -429,8 +439,105 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
     }
     .chart-grid{
       display:grid;
-      grid-template-columns: 1fr;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
       gap: 12px;
+    }
+    .error-list{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .error-item{
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(220,38,38,.25);
+      background: rgba(254,226,226,.6);
+      color: #7f1d1d;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .error-item.is-active{
+      border-color: rgba(185,28,28,.45);
+      background: rgba(254,202,202,.7);
+      color: #991b1b;
+    }
+    .summary-grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px;
+    }
+    .summary-card{
+      border: 1px solid rgba(15,23,42,.08);
+      border-radius: 14px;
+      padding: 10px 12px;
+      background: #ffffff;
+    }
+    .summary-card h4{
+      margin: 0 0 8px;
+      font-size: 13px;
+      color:#1f2937;
+    }
+    .summary-card ul{
+      list-style:none;
+      margin:0;
+      padding:0;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      font-size:12px;
+      color:#374151;
+    }
+    .summary-card li{
+      display:flex;
+      justify-content:space-between;
+      gap:8px;
+      padding:6px 8px;
+      border-radius:10px;
+      background: rgba(15,23,42,.04);
+    }
+    .gantt-controls{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(15,23,42,.08);
+      background: #ffffff;
+    }
+    .gantt-controls .control{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      font-size:12px;
+      color:#374151;
+      font-weight:600;
+    }
+    .gantt-controls textarea{
+      min-height: 70px;
+    }
+    .gantt-controls .control-inline{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      align-items:flex-start;
+      justify-content:flex-end;
+    }
+    .gantt-controls .control-inline label{
+      font-size:12px;
+      font-weight:600;
+      color:#374151;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .chart-card canvas{
+      width:100% !important;
+      height: 220px !important;
+      max-height: 240px;
+    }
+    .chart-card canvas.chart-donut{
+      height: 200px !important;
+      max-height: 220px;
     }
 
     .badge-bim{
@@ -439,27 +546,29 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       font-weight:900;
       padding: 6px 10px;
       border-radius: 999px;
-      background: rgba(0,191,255,.14);
-      border: 1px solid rgba(0,191,255,.25);
-      color: rgba(244,242,237,.90);
+      background: rgba(59,130,246,.12);
+      border: 1px solid rgba(59,130,246,.20);
+      color: #1e3a8a;
     }
 
     /* Gantt */
     .gantt-wrap{
-      background: rgba(255,255,255,.06);
-      border: 1px solid rgba(255,255,255,.14);
+      background: #ffffff;
+      border: 1px solid rgba(15,23,42,.10);
       border-radius: 18px;
       overflow:hidden;
+      box-shadow: var(--shadow);
     }
     .gantt-head{
       padding: 12px 14px;
-      border-bottom: 1px solid rgba(255,255,255,.12);
+      border-bottom: 1px solid rgba(15,23,42,.08);
       display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;
-      background: rgba(255,255,255,.04);
+      background: #f8fafc;
+      color:#111827;
     }
     .gantt-head .meta{
       font-size: 12px;
-      color: rgba(244,242,237,.82);
+      color: #1f2937;
       font-weight: 700;
       display:flex; gap:10px; flex-wrap:wrap; align-items:center;
     }
@@ -472,13 +581,15 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       .gantt-grid{ grid-template-columns: 1fr; }
     }
     .gantt-left{
-      border-right: 1px solid rgba(255,255,255,.10);
+      border-right: 1px solid rgba(15,23,42,.08);
       padding: 10px;
+      background: #fff;
     }
     .gantt-right{
       position:relative;
       overflow:auto;
       padding: 10px;
+      background: #fff;
     }
     .gantt-timeline{
       display:grid;
@@ -488,41 +599,42 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       position:sticky;
       top:0;
       z-index:4;
-      background: rgba(10,12,18,.88);
-      border-bottom: 1px solid rgba(255,255,255,.10);
+      background: #f8fafc;
+      border-bottom: 1px solid rgba(15,23,42,.08);
     }
     .time-cell{
       text-align:center;
       font-weight: 900;
-      font-size: 11px;
-      padding: 8px 0;
-      border-right: 1px solid rgba(255,255,255,.08);
-      color: rgba(244,242,237,.85);
+      font-size: 10px;
+      padding: 6px 0;
+      border-right: 1px solid rgba(15,23,42,.08);
+      color: #111827;
       user-select:none;
+      letter-spacing:.2px;
     }
     .track{
       display:grid;
       grid-auto-flow: column;
       grid-auto-columns: minmax(40px, 1fr);
-      border-bottom: 1px solid rgba(255,255,255,.08);
+      border-bottom: 1px solid rgba(15,23,42,.06);
       position:relative;
       height: 34px;
     }
-    .track:hover{ background: rgba(255,255,255,.04); }
+    .track:hover{ background: rgba(15,23,42,.03); }
     .bar{
       position:absolute;
       height: 18px;
       top: 8px;
       border-radius: 999px;
-      background: rgba(246,168,104,.75);
-      border: 1px solid rgba(246,168,104,.45);
-      box-shadow: 0 8px 18px rgba(0,0,0,.22);
+      background: rgba(37,99,235,.75);
+      border: 1px solid rgba(37,99,235,.45);
+      box-shadow: 0 8px 18px rgba(15,23,42,.15);
       cursor: grab;
     }
     .bar:active{ cursor: grabbing; }
     .bar.baseline{
-      background: rgba(0,191,255,.20);
-      border: 1px dashed rgba(0,191,255,.40);
+      background: rgba(59,130,246,.18);
+      border: 1px dashed rgba(59,130,246,.45);
       box-shadow: none;
       height: 10px;
       top: 20px;
@@ -550,11 +662,40 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
     .drawer{
       width: min(520px, 95vw);
       height: 100%;
-      background: rgba(10,12,18,.92);
-      border-left: 1px solid rgba(255,255,255,.14);
-      box-shadow: -14px 0 60px rgba(0,0,0,.50);
+      background: #ffffff;
+      border-left: 1px solid rgba(15,23,42,.10);
+      box-shadow: -14px 0 60px rgba(15,23,42,.18);
       padding: 16px;
       overflow:auto;
+      color:#111827;
+    }
+    .drawer-header{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(15,23,42,.08);
+      margin-bottom: 12px;
+    }
+    .drawer-title{
+      font-family: "Baloo 2";
+      font-size: 18px;
+      margin:0;
+    }
+    .drawer-sub{
+      font-size: 12px;
+      color: #4b5563;
+      margin-top: 4px;
+    }
+    .drawer-body{ margin-bottom: 12px; }
+    .drawer-footer{
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      gap:10px;
+      border-top: 1px solid rgba(15,23,42,.08);
+      padding-top: 12px;
     }
     .drawer h3{
       margin: 0 0 8px;
@@ -563,7 +704,7 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
     }
     .drawer .sub{
       margin: 0 0 14px;
-      color: rgba(244,242,237,.78);
+      color: #4b5563;
       font-size: 12px;
       line-height:1.35;
     }
@@ -579,7 +720,14 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       display:block;
       font-size: 11px;
       font-weight: 900;
-      color: rgba(244,242,237,.86);
+      color: #1f2937;
+      margin-bottom: 6px;
+    }
+    .field span{
+      display:block;
+      font-size: 11px;
+      font-weight: 900;
+      color: #1f2937;
       margin-bottom: 6px;
     }
     .field input, .field select, .field textarea{
@@ -607,11 +755,11 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
 
     /* Small hints */
     .hint{
-      background: rgba(255,255,255,.08);
-      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(15,23,42,.03);
+      border: 1px solid rgba(15,23,42,.10);
       border-radius: 14px;
       padding: 10px 12px;
-      color: rgba(244,242,237,.85);
+      color: #374151;
       font-size: 12px;
       line-height:1.35;
     }
@@ -633,12 +781,9 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
 .rum-planner-page canvas{ display:block; }
 .rum-planner-page .grid{
   display:grid;
-  grid-template-columns: 1.2fr .8fr;
+  grid-template-columns: 1fr;
   gap: 14px;
   align-items:start;
-}
-@media (max-width: 1180px){
-  .rum-planner-page .grid{ grid-template-columns: 1fr; }
 }
 .rum-planner-page .row{
   display:flex;
@@ -661,7 +806,7 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
   .rum-planner-page .gantt-body{ grid-template-columns: 1fr; }
   .rum-planner-page .gantt-left{
     border-right:none;
-    border-bottom: 1px solid rgba(255,255,255,.10);
+    border-bottom: 1px solid rgba(15,23,42,.10);
   }
 }
 .rum-planner-page .gantt-left,
@@ -677,7 +822,19 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
   .rum-planner-wrap{ padding: 0 12px; }
 }
 /* Evita que algún CSS externo fuerce blancos raros */
-.rum-planner-page .card{ background: rgba(10,12,18,.65); border:1px solid rgba(255,255,255,.10); }
+.rum-planner-page .card{ background: #ffffff; border:1px solid rgba(15,23,42,.10); color:#111827; }
+.rum-planner-page .muted{ color: #6b7280; }
+.rum-planner-page h1,
+.rum-planner-page h2,
+.rum-planner-page h3,
+.rum-planner-page h4,
+.rum-planner-page h5{ color:#111827; }
+.rum-planner-page table thead th{ color:#111827; }
+.rum-planner-page table tbody td{ color:#111827; }
+.rum-planner-page .panel-header p{ color: #4b5563; }
+.rum-planner-page .gantt-head strong{ color:#111827; }
+.rum-planner-page .table-wrap{ background:#ffffff; }
+.rum-planner-page #heatWrap{ background:#ffffff; border-color: rgba(15,23,42,.10); }
 
   </style>
 </head>
@@ -700,7 +857,8 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
   <div class="satellite satellite-1"></div>
   <div class="satellite satellite-2"></div>
 
-<div class="nav-wrap">
+  <div class="rum-shell">
+    <div class="nav-wrap">
       <div class="nav-fallback">
         <div class="brand">
           <div class="logo">R</div>
@@ -777,8 +935,8 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
               <th class="col-act sticky-col-2">Actividad</th>
               <th class="col-trade">Trade</th>
               <th class="col-phase">Fase</th>
-              <th class="col-start">Inicio</th>
-              <th class="col-dur">Dur.</th>
+              <th class="col-start">Inicio (día)</th>
+              <th class="col-dur">Dur. (días)</th>
               <th class="col-pred">Pred.</th>
               <th class="col-rel">Rel.</th>
               <th class="col-cost">Costo (BAC)</th>
@@ -827,7 +985,7 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
           <div class="drawer-title">Nueva actividad</div>
           <div class="drawer-sub">Rellena lo esencial. Lo demás lo puedes completar después.</div>
         </div>
-        <button class="btn btn-ghost" id="btnCloseDrawer" type="button">Cerrar</button>
+        <button class="btn btn-ghost" id="btnCloseActivityDrawer" type="button">Cerrar</button>
       </div>
 
       <div class="drawer-body">
@@ -874,11 +1032,11 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
           </label>
 
           <label class="field">
-            <span>Inicio (semana)</span>
+            <span>Inicio (día)</span>
             <input id="d_start" type="number" min="1" value="1" />
           </label>
           <label class="field">
-            <span>Duración (semanas)</span>
+            <span>Duración (días)</span>
             <input id="d_dur" type="number" min="1" value="1" />
           </label>
 
@@ -914,7 +1072,7 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       </div>
 
       <div class="drawer-footer">
-        <button class="btn btn-ghost" id="btnCancelDrawer" type="button">Cancelar</button>
+        <button class="btn btn-ghost" id="btnCancelActivityDrawer" type="button">Cancelar</button>
         <button class="btn btn-primary" id="btnCreateActivity" type="button">Crear actividad</button>
       </div>
     </aside>
@@ -925,15 +1083,33 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       <div class="gantt-head">
         <div class="meta">
           <strong style="color:#111827">Gantt interactivo</strong>
-          · Horizonte <span id="weeksLabel"></span> semanas
+          · Horizonte <span id="weeksLabel"></span> días
           · <span class="badge-bim">Hook BIM: Exporta JSON</span>
         </div>
         <div class="actions">
           <button class="btn btn-mini" id="btnZoomIn">Zoom +</button>
           <button class="btn btn-mini" id="btnZoomOut">Zoom -</button>
           <button class="btn btn-mini" id="btnFit">Fit</button>
-          <button class="btn btn-mini" id="btnCellPlus">Semana +</button>
-          <button class="btn btn-mini" id="btnCellMinus">Semana -</button>
+          <button class="btn btn-mini" id="btnCellPlus">Día +</button>
+          <button class="btn btn-mini" id="btnCellMinus">Día -</button>
+        </div>
+      </div>
+
+      <div class="gantt-controls">
+        <div class="control">
+          <label for="projectStartDate">Fecha de inicio</label>
+          <input type="date" id="projectStartDate" />
+        </div>
+        <div class="control">
+          <label for="nonWorkingDays">Días no laborables (YYYY-MM-DD)</label>
+          <textarea id="nonWorkingDays" placeholder="2025-01-01&#10;2025-02-05"></textarea>
+        </div>
+        <div class="control-inline">
+          <label>
+            <input type="checkbox" id="weekendsOff" checked />
+            Sábado y domingo no laborables
+          </label>
+          <button class="btn btn-mini" id="btnApplyStartDate">Calcular fechas</button>
         </div>
       </div>
 
@@ -950,9 +1126,6 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       </div>
     </section>
 
-      </div>
-
-      <div>
         <section class="panel" style="margin-top:12px">
           <div class="panel-header">
             <div>
@@ -967,6 +1140,10 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
           </div>
 
           <div class="panel-body">
+            <div class="error-list">
+              <div class="error-item" id="errorCost">Error 01: —</div>
+              <div class="error-item" id="errorWbs">Error 02: —</div>
+            </div>
             <div class="cards">
               <div class="card">
                 <div class="k">BAC Total</div>
@@ -985,19 +1162,45 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
               </div>
             </div>
 
+            <div class="summary-grid" style="margin-top:12px">
+              <div class="summary-card">
+                <h4>Partidas generales (fase)</h4>
+                <ul id="phaseSummary"></ul>
+              </div>
+              <div class="summary-card">
+                <h4>Partidas generales (trade)</h4>
+                <ul id="tradeSummary"></ul>
+              </div>
+            </div>
+
             <div class="chart-grid" style="margin-top:12px">
               <div class="chart-card">
                 <h3>S-Curve (PV / EV / AC)</h3>
-                <canvas id="chartSCurve" height="180"></canvas>
+                <canvas id="chartSCurve" class="chart-canvas" height="180"></canvas>
               </div>
 
               <div class="chart-card">
                 <h3>Distribución por trade</h3>
-                <canvas id="chartDonut" height="140"></canvas>
+                <canvas id="chartDonut" class="chart-donut" height="140"></canvas>
               </div>
 
               <div class="chart-card">
-                <h3>Heatmap Lean (restricciones por semana)</h3>
+                <h3>Costo por fase (BAC)</h3>
+                <canvas id="chartPhaseCost" class="chart-canvas" height="180"></canvas>
+              </div>
+
+              <div class="chart-card">
+                <h3>Estado de actividades</h3>
+                <canvas id="chartStatus" class="chart-donut" height="160"></canvas>
+              </div>
+
+              <div class="chart-card">
+                <h3>Cashflow diario (PV / AC)</h3>
+                <canvas id="chartDaily" class="chart-canvas" height="180"></canvas>
+              </div>
+
+              <div class="chart-card">
+                <h3>Heatmap Lean (restricciones por día)</h3>
                 <div id="heatWrap" style="overflow:auto;border-radius:14px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06)">
                   <canvas id="heatCanvas" width="900" height="220" style="display:block"></canvas>
                 </div>
@@ -1082,11 +1285,11 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
         </div>
 
         <div class="field">
-          <label>Inicio (semana)</label>
+          <label>Inicio (día)</label>
           <input id="dStart" type="number" min="1" />
         </div>
         <div class="field">
-          <label>Duración (semanas)</label>
+          <label>Duración (días)</label>
           <input id="dDur" type="number" min="1" />
         </div>
 
@@ -1165,25 +1368,29 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
   <div class="toast" id="toast"></div>
 
   <script>
+    (()=> {
+    'use strict';
     /* ===========================
        Estado base
        =========================== */
 
     const STORAGE_KEY = 'RUM_PLANNER_V1';
+    const DAYS_PER_WEEK = 7;
 
-    let HORIZON_WEEKS = 16;
-    let CELL_WIDTH = 44;
+    const BASE_CELL_WIDTH = 26;
+    let HORIZON_DAYS = 70;
+    let CELL_WIDTH = BASE_CELL_WIDTH;
     let ZOOM = 1.0;
 
     const state = {
       mode: 'normal',
       tasks: [
-        { id:1, wbs:'A.01', name:'Trazo y replanteo', trade:'Arquitectura', phase:'Preconstrucción', start:1, dur:1, pred:null, rel:'FS', cost: 35000, ac:0, percent:0, status:'Por liberar', restr:0, revitId:'', revitUniqueIds:[], constructionStatus:'', notes:'', baselineStart:null, baselineDur:null, payapp:null },
-        { id:2, wbs:'A.02', name:'Excavación', trade:'Estructuras', phase:'Cimentación', start:2, dur:2, pred:'A.01', rel:'FS', cost: 180000, ac:0, percent:0, status:'Por liberar', restr:1, revitId:'', revitUniqueIds:[], constructionStatus:'', notes:'', baselineStart:null, baselineDur:null, payapp:null },
-        { id:3, wbs:'A.03', name:'Cimentación', trade:'Estructuras', phase:'Cimentación', start:4, dur:3, pred:'A.02', rel:'FS', cost: 420000, ac:0, percent:0, status:'Por liberar', restr:0, revitId:'', revitUniqueIds:[], constructionStatus:'', notes:'', baselineStart:null, baselineDur:null, payapp:null },
-        { id:4, wbs:'A.04', name:'Estructura', trade:'Estructuras', phase:'Estructura', start:7, dur:4, pred:'A.03', rel:'FS', cost: 950000, ac:0, percent:0, status:'Por liberar', restr:0, revitId:'', revitUniqueIds:[], constructionStatus:'', notes:'', baselineStart:null, baselineDur:null, payapp:null },
-        { id:5, wbs:'A.05', name:'MEP rough-in', trade:'HVAC', phase:'MEP', start:9, dur:3, pred:'A.04', rel:'SS', cost: 520000, ac:0, percent:0, status:'Por liberar', restr:0, revitId:'', revitUniqueIds:[], constructionStatus:'', notes:'', baselineStart:null, baselineDur:null, payapp:null },
-        { id:6, wbs:'A.06', name:'Acabados base', trade:'Interiores', phase:'Acabados', start:12, dur:3, pred:'A.05', rel:'FS', cost: 680000, ac:0, percent:0, status:'Por liberar', restr:1, revitId:'', revitUniqueIds:[], constructionStatus:'', notes:'', baselineStart:null, baselineDur:null, payapp:null },
+        { id:1, wbs:'A.01', name:'Trazo y replanteo', trade:'Arquitectura', phase:'Preconstrucción', start:1, dur:5, pred:null, rel:'FS', cost: 35000, ac:0, percent:0, status:'Por liberar', restr:0, revitId:'', revitUniqueIds:[], constructionStatus:'', notes:'', baselineStart:null, baselineDur:null, payapp:null },
+        { id:2, wbs:'A.02', name:'Excavación', trade:'Estructuras', phase:'Cimentación', start:6, dur:10, pred:'A.01', rel:'FS', cost: 180000, ac:0, percent:0, status:'Por liberar', restr:1, revitId:'', revitUniqueIds:[], constructionStatus:'', notes:'', baselineStart:null, baselineDur:null, payapp:null },
+        { id:3, wbs:'A.03', name:'Cimentación', trade:'Estructuras', phase:'Cimentación', start:16, dur:12, pred:'A.02', rel:'FS', cost: 420000, ac:0, percent:0, status:'Por liberar', restr:0, revitId:'', revitUniqueIds:[], constructionStatus:'', notes:'', baselineStart:null, baselineDur:null, payapp:null },
+        { id:4, wbs:'A.04', name:'Estructura', trade:'Estructuras', phase:'Estructura', start:28, dur:15, pred:'A.03', rel:'FS', cost: 950000, ac:0, percent:0, status:'Por liberar', restr:0, revitId:'', revitUniqueIds:[], constructionStatus:'', notes:'', baselineStart:null, baselineDur:null, payapp:null },
+        { id:5, wbs:'A.05', name:'MEP rough-in', trade:'HVAC', phase:'MEP', start:40, dur:10, pred:'A.04', rel:'SS', cost: 520000, ac:0, percent:0, status:'Por liberar', restr:0, revitId:'', revitUniqueIds:[], constructionStatus:'', notes:'', baselineStart:null, baselineDur:null, payapp:null },
+        { id:6, wbs:'A.06', name:'Acabados base', trade:'Interiores', phase:'Acabados', start:50, dur:12, pred:'A.05', rel:'FS', cost: 680000, ac:0, percent:0, status:'Por liberar', restr:1, revitId:'', revitUniqueIds:[], constructionStatus:'', notes:'', baselineStart:null, baselineDur:null, payapp:null },
       ],
       milestones: [
         { id:1, name:'Hito 1: Cimentación OK', week:6, value: 250000 },
@@ -1204,6 +1411,149 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       return String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
     }
     function clamp(n,min,max){ return Math.max(min, Math.min(max,n)); }
+
+    function formatDateISO(date){
+      const y = date.getFullYear();
+      const m = String(date.getMonth()+1).padStart(2,'0');
+      const d = String(date.getDate()).padStart(2,'0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function mexicoHolidays(year){
+      return [
+        `${year}-01-01`,
+        `${year}-02-05`,
+        `${year}-03-21`,
+        `${year}-05-01`,
+        `${year}-09-16`,
+        `${year}-11-18`,
+        `${year}-12-25`,
+      ];
+    }
+
+    function parseNonWorkingDates(){
+      const raw = String(document.getElementById('nonWorkingDays')?.value || '');
+      const parts = raw.split(/[\n,]+/).map(s=>s.trim()).filter(Boolean);
+      return new Set(parts);
+    }
+
+    function isNonWorking(date, nonWorkingSet, weekendsOff){
+      const day = date.getDay();
+      const iso = formatDateISO(date);
+      if (nonWorkingSet.has(iso)) return true;
+      if (weekendsOff && (day === 0 || day === 6)) return true;
+      return false;
+    }
+
+    function nextWorkingDate(date, nonWorkingSet, weekendsOff){
+      const d = new Date(date);
+      while (isNonWorking(d, nonWorkingSet, weekendsOff)){
+        d.setDate(d.getDate() + 1);
+      }
+      return d;
+    }
+
+    function addWorkingDays(startDate, workDays, nonWorkingSet, weekendsOff){
+      let current = new Date(startDate);
+      let count = 0;
+      while (count < workDays){
+        if (!isNonWorking(current, nonWorkingSet, weekendsOff)){
+          count += 1;
+          if (count === workDays) break;
+        }
+        current.setDate(current.getDate() + 1);
+      }
+      return current;
+    }
+
+    function daysBetween(startDate, endDate){
+      const ms = 24 * 60 * 60 * 1000;
+      const start = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+      const end = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
+      return Math.round((end - start) / ms);
+    }
+
+    function normalizeTaskUnits(task, fromWeeks){
+      if (!fromWeeks) return task;
+      const start = Number(task.start||1) * DAYS_PER_WEEK;
+      const dur = Math.max(1, Number(task.dur||1)) * DAYS_PER_WEEK;
+      const baselineStart = task.baselineStart ? Number(task.baselineStart) * DAYS_PER_WEEK : task.baselineStart;
+      const baselineDur = task.baselineDur ? Math.max(1, Number(task.baselineDur||1)) * DAYS_PER_WEEK : task.baselineDur;
+      return { ...task, start, dur, baselineStart, baselineDur };
+    }
+
+    function applyLoadedData(obj){
+      if (obj.mode) state.mode = obj.mode;
+      let fromWeeks = false;
+      if (Number.isFinite(obj.horizon_days)){
+        HORIZON_DAYS = Number(obj.horizon_days);
+      } else if (Number.isFinite(obj.horizonDays)){
+        HORIZON_DAYS = Number(obj.horizonDays);
+      } else if (Number.isFinite(obj.horizonWeeks)){
+        HORIZON_DAYS = Number(obj.horizonWeeks) * DAYS_PER_WEEK;
+        fromWeeks = true;
+      }
+      if (Array.isArray(obj.tasks)){
+        state.tasks = obj.tasks.map(t => normalizeTaskUnits(t, fromWeeks));
+      }
+      if (Array.isArray(obj.milestones)){
+        state.milestones = obj.milestones.map(m=>{
+          if (fromWeeks && Number.isFinite(m.week)){
+            return { ...m, day: Number(m.week) * DAYS_PER_WEEK };
+          }
+          return m;
+        });
+      }
+      state.procurement = Array.isArray(obj.procurement) ? obj.procurement : state.procurement;
+    }
+
+    function scheduleFromStartDate(){
+      const dateValue = document.getElementById('projectStartDate')?.value;
+      if (!dateValue) return toast('Selecciona una fecha de inicio', true);
+      const startDate = new Date(dateValue + 'T00:00:00');
+      const nonWorkingSet = parseNonWorkingDates();
+      const weekendsOff = document.getElementById('weekendsOff')?.checked ?? true;
+
+      const taskByWbs = new Map();
+      state.tasks.forEach(t=>taskByWbs.set(String(t.wbs||'').trim(), t));
+      const endDates = new Map();
+
+      const sorted = [...state.tasks].sort((a,b)=>Number(a.start||0) - Number(b.start||0));
+      sorted.forEach((t, index)=>{
+        let earliestDate = startDate;
+        const predKey = String(t.pred||'').trim();
+        if (predKey && taskByWbs.has(predKey)){
+          const predTask = taskByWbs.get(predKey);
+          const predEnd = endDates.get(predTask.id);
+          if (predEnd) {
+            earliestDate = new Date(predEnd);
+            earliestDate.setDate(earliestDate.getDate() + 1);
+          }
+        } else if (index > 0){
+          const prev = sorted[index - 1];
+          const prevEnd = endDates.get(prev.id);
+          if (prevEnd) {
+            earliestDate = new Date(prevEnd);
+            earliestDate.setDate(earliestDate.getDate() + 1);
+          }
+        }
+
+        const workStart = nextWorkingDate(earliestDate, nonWorkingSet, weekendsOff);
+        const workDays = Math.max(1, Number(t.dur||1));
+        const workEnd = addWorkingDays(workStart, workDays, nonWorkingSet, weekendsOff);
+        endDates.set(t.id, workEnd);
+
+        const startOffset = daysBetween(startDate, workStart) + 1;
+        const endOffset = daysBetween(startDate, workEnd) + 1;
+        t.start = Math.max(1, startOffset);
+        t.dur = Math.max(1, endOffset - startOffset + 1);
+      });
+
+      const maxEnd = Math.max(...Array.from(endDates.values()).map(d=>daysBetween(startDate, d) + 1), HORIZON_DAYS);
+      HORIZON_DAYS = clamp(maxEnd + 3, 10, 180);
+      refreshAll();
+      toast('Fechas recalculadas con días no laborables');
+    }
 
     function toast(msg, bad=false){
       const el = document.getElementById('toast');
@@ -1353,8 +1703,8 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
               if (!Number.isFinite(v)) v = 0;
             }
 
-            if (key==='start') t.start = clamp(v,1,HORIZON_WEEKS);
-            else if (key==='dur') t.dur = clamp(v,1,HORIZON_WEEKS);
+            if (key==='start') t.start = clamp(v,1,HORIZON_DAYS);
+            else if (key==='dur') t.dur = clamp(v,1,HORIZON_DAYS);
             else if (key==='percent') t.percent = clamp(v,0,100);
             else if (key==='cost') t.cost = Math.max(0,v);
             else if (key==='ac') t.ac = Math.max(0,v);
@@ -1460,8 +1810,8 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       t.name = String(document.getElementById('dName').value||'').trim();
       t.trade = document.getElementById('dTrade').value;
       t.phase = document.getElementById('dPhase').value;
-      t.start = clamp(Number(document.getElementById('dStart').value||1),1,HORIZON_WEEKS);
-      t.dur = clamp(Number(document.getElementById('dDur').value||1),1,HORIZON_WEEKS);
+      t.start = clamp(Number(document.getElementById('dStart').value||1),1,HORIZON_DAYS);
+      t.dur = clamp(Number(document.getElementById('dDur').value||1),1,HORIZON_DAYS);
       t.pred = (String(document.getElementById('dPred').value||'').trim() || null);
       t.rel = document.getElementById('dRel').value;
       t.cost = Math.max(0, Number(document.getElementById('dCost').value||0));
@@ -1495,13 +1845,13 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       const tl = document.getElementById('timeline');
       tl.style.gridAutoColumns = `${CELL_WIDTH}px`;
       tl.innerHTML = '';
-      for (let w=1; w<=HORIZON_WEEKS; w++){
-        const d = document.createElement('div');
-        d.className = 'time-cell';
-        d.textContent = `W${w}`;
-        tl.appendChild(d);
+      for (let day=1; day<=HORIZON_DAYS; day++){
+        const cell = document.createElement('div');
+        cell.className = 'time-cell';
+        cell.textContent = `D${day}`;
+        tl.appendChild(cell);
       }
-      document.getElementById('weeksLabel').textContent = HORIZON_WEEKS;
+      document.getElementById('weeksLabel').textContent = HORIZON_DAYS;
     }
 
     function renderGantt(){
@@ -1517,8 +1867,8 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
         row.style.flexDirection='column';
         row.style.gap='2px';
         row.style.padding='6px 6px';
-        row.style.borderBottom='1px solid rgba(255,255,255,.08)';
-        row.innerHTML = `<div style="font-weight:900">${escapeHtml(t.wbs)}</div><div style="opacity:.8;font-size:11px">${escapeHtml(t.name)}</div>`;
+        row.style.borderBottom='1px solid rgba(15,23,42,.08)';
+        row.innerHTML = `<div style="font-weight:900">${escapeHtml(t.wbs)}</div><div style="opacity:.75;font-size:11px">${escapeHtml(t.name)}</div>`;
         left.appendChild(row);
 
         const track = document.createElement('div');
@@ -1544,7 +1894,7 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
         const w0 = Number(t.dur||1) * CELL_WIDTH;
         bar.style.left = `${x0}px`;
         bar.style.width = `${w0}px`;
-        bar.title = `${t.wbs} | ${t.name} (W${t.start} +${t.dur})`;
+        bar.title = `${t.wbs} | ${t.name} (D${t.start} +${t.dur})`;
         track.appendChild(bar);
 
         // drag logic
@@ -1561,8 +1911,8 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
         window.addEventListener('mousemove', (e)=>{
           if (!dragging) return;
           const dx = e.clientX - dragStartX;
-          const deltaWeeks = Math.round(dx / CELL_WIDTH);
-          t.start = clamp(origStart + deltaWeeks, 1, HORIZON_WEEKS);
+          const deltaDays = Math.round(dx / CELL_WIDTH);
+          t.start = clamp(origStart + deltaDays, 1, HORIZON_DAYS);
           renderTable();
           renderGantt();
           refreshKpisCharts();
@@ -1576,12 +1926,12 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
         tracks.appendChild(track);
       });
 
-      // today line (optional: semana actual basada en hoy -> 1)
-      const todayWeek = 1;
+      // today line (optional: día actual basado en hoy -> 1)
+      const todayDay = 1;
       const line = document.getElementById('todayLine');
-      if (todayWeek >=1 && todayWeek <= HORIZON_WEEKS){
+      if (todayDay >=1 && todayDay <= HORIZON_DAYS){
         line.style.display='block';
-        line.style.left = `${(todayWeek-1)*CELL_WIDTH}px`;
+        line.style.left = `${(todayDay-1)*CELL_WIDTH}px`;
         line.style.height = `${Math.max(360, list.length*34)}px`;
       }else{
         line.style.display='none';
@@ -1593,25 +1943,28 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
 
     let chartSCurve = null;
     let chartDonut = null;
+    let chartPhaseCost = null;
+    let chartStatus = null;
+    let chartDaily = null;
     let chartIssues = null;
 
     function seriesPV(){
-      // PV simple: distribuir BAC linealmente por duración dentro del horizonte
-      const pv = Array.from({length:HORIZON_WEEKS},()=>0);
+      // PV simple: distribuir BAC linealmente por duración dentro del horizonte (días)
+      const pv = Array.from({length:HORIZON_DAYS},()=>0);
       state.tasks.forEach(t=>{
         const bac = Number(t.cost||0);
         if (bac<=0) return;
         const dur = Math.max(1, Number(t.dur||1));
         const per = bac/dur;
         for (let i=0;i<dur;i++){
-          const w = (Number(t.start||1)-1)+i;
-          if (w>=0 && w<pv.length) pv[w]+=per;
+          const d = (Number(t.start||1)-1)+i;
+          if (d>=0 && d<pv.length) pv[d]+=per;
         }
       });
       return pv;
     }
     function seriesEV(){
-      const ev = Array.from({length:HORIZON_WEEKS},()=>0);
+      const ev = Array.from({length:HORIZON_DAYS},()=>0);
       state.tasks.forEach(t=>{
         const bac = Number(t.cost||0);
         const dur = Math.max(1, Number(t.dur||1));
@@ -1619,20 +1972,20 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
         const earned = bac*pct;
         const per = earned/dur;
         for (let i=0;i<dur;i++){
-          const w = (Number(t.start||1)-1)+i;
-          if (w>=0 && w<ev.length) ev[w]+=per;
+          const d = (Number(t.start||1)-1)+i;
+          if (d>=0 && d<ev.length) ev[d]+=per;
         }
       });
       return ev;
     }
     function seriesAC(){
-      // AC se suma en la semana de fin planificada (simplificado)
-      const ac = Array.from({length:HORIZON_WEEKS},()=>0);
+      // AC se suma en el día de fin planificado (simplificado)
+      const ac = Array.from({length:HORIZON_DAYS},()=>0);
       state.tasks.forEach(t=>{
         const v = Number(t.ac||0);
         if (v<=0) return;
-        const endW = clamp((Number(t.start||1)+Number(t.dur||1)-1),1,HORIZON_WEEKS);
-        ac[endW-1]+=v;
+        const endDay = clamp((Number(t.start||1)+Number(t.dur||1)-1),1,HORIZON_DAYS);
+        ac[endDay-1]+=v;
       });
       return ac;
     }
@@ -1651,6 +2004,41 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       document.getElementById('kpiBAC').textContent = money(bacTotal);
       document.getElementById('kpiEV').textContent = money(evTotal);
       document.getElementById('kpiAC').textContent = money(acTotal);
+
+      window.__missingCost = state.tasks.filter(t=>Number(t.cost||0) <= 0).length;
+      window.__missingWbs = state.tasks.filter(t=>!String(t.wbs||'').trim()).length;
+      const errorCostEl = document.getElementById('errorCost');
+      const errorWbsEl = document.getElementById('errorWbs');
+      if (errorCostEl) {
+        errorCostEl.textContent = `Error 01: ${window.__missingCost} actividades sin BAC`;
+        errorCostEl.classList.toggle('is-active', window.__missingCost > 0);
+      }
+      if (errorWbsEl) {
+        errorWbsEl.textContent = `Error 02: ${window.__missingWbs} actividades sin WBS`;
+        errorWbsEl.classList.toggle('is-active', window.__missingWbs > 0);
+      }
+
+      const phaseTotals = {};
+      const tradeTotals = {};
+      state.tasks.forEach(t=>{
+        const phase = t.phase || 'Sin fase';
+        const trade = t.trade || 'Sin trade';
+        const cost = Number(t.cost||0);
+        phaseTotals[phase] = (phaseTotals[phase]||0) + cost;
+        tradeTotals[trade] = (tradeTotals[trade]||0) + cost;
+      });
+      const phaseSummary = document.getElementById('phaseSummary');
+      const tradeSummary = document.getElementById('tradeSummary');
+      if (phaseSummary) {
+        phaseSummary.innerHTML = Object.entries(phaseTotals).map(([k,v])=>(
+          `<li><span>${escapeHtml(k)}</span><strong>${money(v)}</strong></li>`
+        )).join('') || '<li><span>Sin datos</span><strong>—</strong></li>';
+      }
+      if (tradeSummary) {
+        tradeSummary.innerHTML = Object.entries(tradeTotals).map(([k,v])=>(
+          `<li><span>${escapeHtml(k)}</span><strong>${money(v)}</strong></li>`
+        )).join('') || '<li><span>Sin datos</span><strong>—</strong></li>';
+      }
 
       const PV = seriesPV();
       const EV = seriesEV();
@@ -1680,7 +2068,14 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       document.getElementById('svChip').textContent = `SV: ${SV? money(SV) : '—'}`;
 
       // S-curve chart
-      const labels = Array.from({length:HORIZON_WEEKS},(_,i)=>`W${i+1}`);
+      const labels = Array.from({length:HORIZON_DAYS},(_,i)=>`D${i+1}`);
+      const dayTick = (value, index) => {
+        const label = labels[index];
+        const day = Number(label?.replace('D',''));
+        if (!day) return '';
+        if (day === 1 || day === HORIZON_DAYS || day % 7 === 1) return label;
+        return '';
+      };
       const ctx1 = document.getElementById('chartSCurve').getContext('2d');
 
       if (chartSCurve) chartSCurve.destroy();
@@ -1689,15 +2084,19 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
         data: {
           labels,
           datasets: [
-            { label:'PV', data: PVc, tension:0.25 },
-            { label:'EV', data: EVc, tension:0.25 },
-            { label:'AC', data: ACc, tension:0.25 },
+            { label:'PV', data: PVc, tension:0.25, pointRadius:0, borderColor:'rgba(37,99,235,.9)' },
+            { label:'EV', data: EVc, tension:0.25, pointRadius:0, borderColor:'rgba(16,185,129,.9)' },
+            { label:'AC', data: ACc, tension:0.25, pointRadius:0, borderColor:'rgba(249,115,22,.9)' },
           ]
         },
         options: {
           responsive:true,
+          maintainAspectRatio:false,
           plugins:{ legend:{ labels:{ boxWidth:10, boxHeight:10 } } },
-          scales:{ x:{ ticks:{ maxRotation:0 } }, y:{ beginAtZero:true } }
+          scales:{
+            x:{ ticks:{ maxRotation:0, autoSkip:false, callback: dayTick } },
+            y:{ beginAtZero:true, suggestedMax: Math.max(...PVc, ...EVc, ...ACc) * 1.15 || 1 }
+          }
         }
       });
 
@@ -1717,8 +2116,82 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
         },
         options:{
           responsive:true,
-          cutout:'70%',
+          maintainAspectRatio:true,
+          aspectRatio: 1.6,
+          cutout:'65%',
           plugins:{ legend:{ position:'bottom' } }
+        }
+      });
+
+      // Cost by phase (bar)
+      const byPhase = {};
+      state.tasks.forEach(t=>{
+        const ph = t.phase || 'Sin fase';
+        byPhase[ph] = (byPhase[ph]||0) + Number(t.cost||0);
+      });
+      const phaseLabels = Object.keys(byPhase);
+      const phaseData = Object.values(byPhase);
+      const ctxPhase = document.getElementById('chartPhaseCost').getContext('2d');
+      if (chartPhaseCost) chartPhaseCost.destroy();
+      chartPhaseCost = new Chart(ctxPhase, {
+        type:'bar',
+        data:{ labels: phaseLabels, datasets:[{ label:'BAC', data: phaseData, backgroundColor:'rgba(37,99,235,.55)' }] },
+        options:{
+          responsive:true,
+          maintainAspectRatio:false,
+          plugins:{ legend:{ display:false } },
+          scales:{
+            x:{ ticks:{ autoSkip:false, maxRotation:45, minRotation:0 } },
+            y:{ beginAtZero:true, suggestedMax: Math.max(...phaseData, 1) * 1.2 }
+          }
+        }
+      });
+
+      // Status distribution
+      const byStatus = {};
+      state.tasks.forEach(t=>{
+        const status = t.status || 'Por liberar';
+        byStatus[status] = (byStatus[status]||0) + 1;
+      });
+      const ctxStatus = document.getElementById('chartStatus').getContext('2d');
+      if (chartStatus) chartStatus.destroy();
+      chartStatus = new Chart(ctxStatus, {
+        type:'doughnut',
+        data:{
+          labels: Object.keys(byStatus),
+          datasets:[{ data:Object.values(byStatus) }]
+        },
+        options:{
+          responsive:true,
+          maintainAspectRatio:true,
+          aspectRatio: 1.6,
+          cutout:'65%',
+          plugins:{ legend:{ position:'bottom' } }
+        }
+      });
+
+      // Daily cashflow (PV vs AC)
+      const ctxDaily = document.getElementById('chartDaily').getContext('2d');
+      if (chartDaily) chartDaily.destroy();
+      const pvMax = Math.max(...PV, 0);
+      const acMax = Math.max(...AC, 0);
+      chartDaily = new Chart(ctxDaily, {
+        type:'line',
+        data:{
+          labels,
+          datasets:[
+            { label:'PV diario', data: PV, tension:0.25, pointRadius:0, borderColor:'rgba(37,99,235,.9)' },
+            { label:'AC diario', data: AC, tension:0.25, pointRadius:0, borderColor:'rgba(220,38,38,.85)' }
+          ]
+        },
+        options:{
+          responsive:true,
+          maintainAspectRatio:false,
+          plugins:{ legend:{ labels:{ boxWidth:10, boxHeight:10 } } },
+          scales:{
+            x:{ ticks:{ autoSkip:false, callback: dayTick } },
+            y:{ beginAtZero:true, suggestedMax: Math.max(pvMax, acMax) * 1.2 || 1 }
+          }
         }
       });
 
@@ -1733,7 +2206,12 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       chartIssues = new Chart(ctx3, {
         type:'bar',
         data:{ labels:Object.keys(issues), datasets:[{ label:'Actividades', data:Object.values(issues) }] },
-        options:{ responsive:true, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, precision:0 } } }
+        options:{
+          responsive:true,
+          maintainAspectRatio:false,
+          plugins:{ legend:{ display:false } },
+          scales:{ y:{ beginAtZero:true, precision:0, suggestedMax: Math.max(...Object.values(issues), 1) * 1.4 } }
+        }
       });
 
       renderHeatmap();
@@ -1751,8 +2229,8 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       const ctx = canvas.getContext('2d');
 
       const rows = filteredTasks();
-      const cols = HORIZON_WEEKS;
-      const cellW = 42;
+      const cols = HORIZON_DAYS;
+      const cellW = 24;
       const cellH = 22;
 
       const w = Math.max(900, cols*cellW + 10);
@@ -1764,12 +2242,12 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
 
       // header
       ctx.font = '700 11px Inter';
-      ctx.fillStyle = 'rgba(244,242,237,.86)';
-      ctx.fillText('WBS / Semana', 10, 16);
+      ctx.fillStyle = '#111827';
+      ctx.fillText('WBS / Día', 10, 16);
 
       for (let c=1;c<=cols;c++){
         const x = 110 + (c-1)*cellW;
-        ctx.fillText(`W${c}`, x+8, 16);
+        ctx.fillText(`D${c}`, x+6, 16);
       }
 
       // grid cells
@@ -1777,7 +2255,7 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
         const t = rows[r];
         const y = 30 + r*cellH;
 
-        ctx.fillStyle = 'rgba(244,242,237,.85)';
+        ctx.fillStyle = '#1f2937';
         ctx.fillText(String(t.wbs||''), 10, y+15);
 
         for (let c=1;c<=cols;c++){
@@ -1788,7 +2266,7 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
           if (inSpan && isConstraint) alpha = 0.30;
           else if (inSpan && !isConstraint) alpha = 0.16;
 
-          ctx.fillStyle = `rgba(0,191,255,${alpha})`;
+          ctx.fillStyle = `rgba(37,99,235,${alpha})`;
           if (inSpan && isConstraint) ctx.fillStyle = `rgba(220,38,38,${alpha})`;
           ctx.fillRect(x, y, cellW-2, cellH-2);
         }
@@ -1801,16 +2279,16 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
         ctx.clearRect(0,0,w,h);
         // re-render base
         ctx.font = '700 11px Inter';
-        ctx.fillStyle = 'rgba(244,242,237,.86)';
-        ctx.fillText('WBS / Semana', 10, 16);
+        ctx.fillStyle = '#111827';
+        ctx.fillText('WBS / Día', 10, 16);
         for (let c=1;c<=cols;c++){
           const x = 110 + (c-1)*cellW;
-          ctx.fillText(`W${c}`, x+8, 16);
+          ctx.fillText(`D${c}`, x+6, 16);
         }
         for (let r=0;r<rows.length;r++){
           const t = rows[r];
           const y = 30 + r*cellH;
-          ctx.fillStyle = 'rgba(244,242,237,.85)';
+          ctx.fillStyle = '#1f2937';
           ctx.fillText(String(t.wbs||''), 10, y+15);
 
           for (let c=1;c<=cols;c++){
@@ -1821,7 +2299,7 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
             if (inSpan && isConstraint) alpha = 0.30;
             else if (inSpan && !isConstraint) alpha = 0.16;
 
-            ctx.fillStyle = `rgba(0,191,255,${alpha})`;
+            ctx.fillStyle = `rgba(37,99,235,${alpha})`;
             if (inSpan && isConstraint) ctx.fillStyle = `rgba(220,38,38,${alpha})`;
             ctx.fillRect(x, y, cellW-2, cellH-2);
           }
@@ -1830,7 +2308,7 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
         if (hover.r>=0 && hover.c>=1){
           const x = 110 + (hover.c-1)*cellW;
           const y = 30 + hover.r*cellH;
-          ctx.strokeStyle = 'rgba(246,168,104,.95)';
+          ctx.strokeStyle = 'rgba(37,99,235,.85)';
           ctx.lineWidth = 2;
           ctx.strokeRect(x+1, y+1, cellW-4, cellH-4);
         }
@@ -1848,7 +2326,7 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
           hover.c = c; hover.r = r;
           const t = rows[r];
           const inSpan = (c >= t.start) && (c <= (t.start+t.dur-1));
-          hint.textContent = `WBS: ${t.wbs} · Semana: W${c} · ${(inSpan? 'En actividad':'Fuera')} · ${(t.restr===1? 'CON restricción':'sin restricción')}`;
+          hint.textContent = `WBS: ${t.wbs} · Día: D${c} · ${(inSpan? 'En actividad':'Fuera')} · ${(t.restr===1? 'CON restricción':'sin restricción')}`;
         }else{
           hover.c = -1; hover.r = -1;
           hint.textContent = 'Pasa el cursor por el heatmap para ver la celda.';
@@ -1923,6 +2401,17 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
        Botones principales
        =========================== */
 
+    const startDateInput = document.getElementById('projectStartDate');
+    if (startDateInput && !startDateInput.value){
+      startDateInput.value = formatDateISO(new Date());
+    }
+    const nonWorkingInput = document.getElementById('nonWorkingDays');
+    if (nonWorkingInput && !nonWorkingInput.value){
+      const year = new Date().getFullYear();
+      nonWorkingInput.value = mexicoHolidays(year).join('\n');
+    }
+    document.getElementById('btnApplyStartDate')?.addEventListener('click', scheduleFromStartDate);
+
     document.getElementById('leanToggle')?.addEventListener('click', (e)=>{
       const btn = e.target.closest('button[data-mode]');
       if (!btn) return;
@@ -1933,25 +2422,77 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       refreshAll();
     });
 
+    const activityDrawer = document.getElementById('activityDrawer');
+    const resetActivityDrawer = () => {
+      document.getElementById('d_wbs').value = '';
+      document.getElementById('d_trade').value = 'Arquitectura';
+      document.getElementById('d_name').value = '';
+      document.getElementById('d_phase').value = 'Preconst';
+      document.getElementById('d_lean').value = 'LEAN-NONE';
+      document.getElementById('d_start').value = 1;
+      document.getElementById('d_dur').value = 1;
+      document.getElementById('d_pred').value = '';
+      document.getElementById('d_rel').value = 'FS';
+      document.getElementById('d_bac').value = 0;
+      document.getElementById('d_pct').value = 0;
+      document.getElementById('d_uid').value = '';
+    };
+    const openActivityDrawer = () => {
+      if (!activityDrawer) return;
+      activityDrawer.style.display = 'flex';
+      activityDrawer.setAttribute('aria-hidden', 'false');
+    };
+    const closeActivityDrawer = () => {
+      if (!activityDrawer) return;
+      activityDrawer.style.display = 'none';
+      activityDrawer.setAttribute('aria-hidden', 'true');
+    };
+
     document.getElementById('btnAdd')?.addEventListener('click', ()=>{
+      resetActivityDrawer();
+      openActivityDrawer();
+    });
+
+    document.getElementById('btnCloseActivityDrawer')?.addEventListener('click', closeActivityDrawer);
+    document.getElementById('btnCancelActivityDrawer')?.addEventListener('click', closeActivityDrawer);
+    activityDrawer?.addEventListener('click', (e)=>{
+      if (e.target === activityDrawer) closeActivityDrawer();
+    });
+
+    document.getElementById('btnCreateActivity')?.addEventListener('click', ()=>{
       const nextId = nextTaskId();
+      const wbs = document.getElementById('d_wbs').value.trim() || `X.${nextId}`;
+      const name = document.getElementById('d_name').value.trim() || 'Nueva actividad';
+      const trade = document.getElementById('d_trade').value.trim() || 'Arquitectura';
+      const phaseSelect = document.getElementById('d_phase');
+      const phase = phaseSelect?.selectedOptions?.[0]?.textContent?.trim() || 'Preconstrucción';
+      const lean = document.getElementById('d_lean').value;
+      const start = clamp(Number(document.getElementById('d_start').value || 1), 1, HORIZON_DAYS);
+      const dur = clamp(Number(document.getElementById('d_dur').value || 1), 1, HORIZON_DAYS);
+      const predValue = document.getElementById('d_pred').value.trim();
+      const rel = document.getElementById('d_rel').value.trim() || 'FS';
+      const cost = Math.max(0, Number(document.getElementById('d_bac').value || 0));
+      const percent = clamp(Number(document.getElementById('d_pct').value || 0), 0, 100);
+      const uidRaw = document.getElementById('d_uid').value.trim();
+      const uniqueIds = uidRaw ? uidRaw.split(',').map(s=>s.trim()).filter(Boolean) : [];
+
       state.tasks.push({
         id: nextId,
-        wbs: `X.${nextId}`,
-        name:'Nueva actividad',
-        trade:'Arquitectura',
-        phase:'Preconstrucción',
-        start:1,
-        dur:1,
-        pred:null,
-        rel:'FS',
-        cost:10000,
-        percent:0,
+        wbs,
+        name,
+        trade,
+        phase,
+        start,
+        dur,
+        pred: predValue || null,
+        rel,
+        cost,
+        percent,
         ac:0,
-        status:'Por liberar',
-        restr:0,
-        revitId:'',
-        revitUniqueIds:[],
+        status: lean === 'LEAN-READY' ? 'Listo' : 'Por liberar',
+        restr: lean === 'LEAN-CONSTRAINT' ? 1 : 0,
+        revitId: uniqueIds[0] || '',
+        revitUniqueIds: uniqueIds,
         constructionStatus:'',
         notes:'',
         baselineStart:null,
@@ -1959,6 +2500,7 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
         payapp:null
       });
       refreshAll();
+      closeActivityDrawer();
       toast('Actividad creada');
     });
 
@@ -1973,7 +2515,8 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
 
     document.getElementById('btnSaveLocal')?.addEventListener('click', ()=>{
       const payload = {
-        horizonWeeks:HORIZON_WEEKS,
+        horizonDays:HORIZON_DAYS,
+        horizonWeeks: Math.ceil(HORIZON_DAYS / DAYS_PER_WEEK),
         mode:state.mode,
         tasks:state.tasks,
         milestones:state.milestones,
@@ -1989,10 +2532,7 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       try{
         const obj = JSON.parse(raw);
         state.mode = obj.mode || 'normal';
-        state.tasks = Array.isArray(obj.tasks) ? obj.tasks : state.tasks;
-        state.milestones = Array.isArray(obj.milestones) ? obj.milestones : state.milestones;
-        state.procurement = Array.isArray(obj.procurement) ? obj.procurement : state.procurement;
-        HORIZON_WEEKS = Number(obj.horizonWeeks || HORIZON_WEEKS);
+        applyLoadedData(obj);
 
         document.querySelectorAll('#leanToggle button').forEach(x=>{
           x.classList.toggle('active', x.dataset.mode===state.mode);
@@ -2149,7 +2689,8 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       const out = {
         schema: 'RUM_PLANNER_UPDATES_V1',
         generated_at: new Date().toISOString(),
-        horizon_weeks: HORIZON_WEEKS,
+        horizon_days: HORIZON_DAYS,
+        horizon_weeks: Math.ceil(HORIZON_DAYS / DAYS_PER_WEEK),
         tasks: []
       };
 
@@ -2190,7 +2731,8 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
 
     document.getElementById('btnExport')?.addEventListener('click', ()=>{
       const payload = {
-        horizonWeeks: HORIZON_WEEKS,
+        horizonDays: HORIZON_DAYS,
+        horizonWeeks: Math.ceil(HORIZON_DAYS / DAYS_PER_WEEK),
         mode: state.mode,
         tasks: state.tasks,
         milestones: state.milestones,
@@ -2211,10 +2753,7 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
           toast('Este JSON es de Updates (Revit). Importa un JSON de Planner para cargar datos.', true);
           return;
         }
-        if (obj.horizonWeeks) HORIZON_WEEKS = Number(obj.horizonWeeks||HORIZON_WEEKS);
-        if (Array.isArray(obj.tasks)) state.tasks = obj.tasks;
-        if (Array.isArray(obj.milestones)) state.milestones = obj.milestones;
-        if (Array.isArray(obj.procurement)) state.procurement = obj.procurement;
+        applyLoadedData(obj);
         refreshAll();
         toast('JSON importado');
       }catch(e){
@@ -2235,10 +2774,7 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       try{
         const raw = await file.text();
         const obj = JSON.parse(raw);
-        if (obj.horizonWeeks) HORIZON_WEEKS = Number(obj.horizonWeeks||HORIZON_WEEKS);
-        if (Array.isArray(obj.tasks)) state.tasks = obj.tasks;
-        if (Array.isArray(obj.milestones)) state.milestones = obj.milestones;
-        if (Array.isArray(obj.procurement)) state.procurement = obj.procurement;
+        applyLoadedData(obj);
         refreshAll();
         toast('JSON cargado desde archivo');
       }catch(e){
@@ -2251,26 +2787,26 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
        =========================== */
 
     document.getElementById('btnCellPlus')?.addEventListener('click', ()=>{
-      HORIZON_WEEKS = clamp(HORIZON_WEEKS+1, 4, 60);
+      HORIZON_DAYS = clamp(HORIZON_DAYS+1, 10, 180);
       refreshAll();
     });
     document.getElementById('btnCellMinus')?.addEventListener('click', ()=>{
-      HORIZON_WEEKS = clamp(HORIZON_WEEKS-1, 4, 60);
+      HORIZON_DAYS = clamp(HORIZON_DAYS-1, 10, 180);
       refreshAll();
     });
     document.getElementById('btnZoomIn')?.addEventListener('click', ()=>{
       ZOOM = clamp(ZOOM + 0.1, 0.7, 1.6);
-      CELL_WIDTH = Math.round(44 * ZOOM);
+      CELL_WIDTH = Math.round(BASE_CELL_WIDTH * ZOOM);
       refreshAll();
     });
     document.getElementById('btnZoomOut')?.addEventListener('click', ()=>{
       ZOOM = clamp(ZOOM - 0.1, 0.7, 1.6);
-      CELL_WIDTH = Math.round(44 * ZOOM);
+      CELL_WIDTH = Math.round(BASE_CELL_WIDTH * ZOOM);
       refreshAll();
     });
     document.getElementById('btnFit')?.addEventListener('click', ()=>{
       ZOOM = 1.0;
-      CELL_WIDTH = 44;
+      CELL_WIDTH = BASE_CELL_WIDTH;
       refreshAll();
     });
 
@@ -2294,7 +2830,9 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
     // init
     refreshAll();
 
+    })();
   </script>
+  </div>
 </div>
 </body>
 </html>
