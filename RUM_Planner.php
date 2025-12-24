@@ -1173,6 +1173,50 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
               </div>
             </div>
 
+            <div class="summary-grid" style="margin-top:12px">
+              <div class="summary-card">
+                <h4>Partidas generales (fase)</h4>
+                <ul id="phaseSummary"></ul>
+              </div>
+              <div class="summary-card">
+                <h4>Partidas generales (trade)</h4>
+                <ul id="tradeSummary"></ul>
+              </div>
+            </div>
+
+            <div class="summary-grid" style="margin-top:12px">
+              <div class="summary-card">
+                <h4>Partidas generales (fase)</h4>
+                <ul id="phaseSummary"></ul>
+              </div>
+              <div class="summary-card">
+                <h4>Partidas generales (trade)</h4>
+                <ul id="tradeSummary"></ul>
+              </div>
+            </div>
+
+            <div class="summary-grid" style="margin-top:12px">
+              <div class="summary-card">
+                <h4>Partidas generales (fase)</h4>
+                <ul id="phaseSummary"></ul>
+              </div>
+              <div class="summary-card">
+                <h4>Partidas generales (trade)</h4>
+                <ul id="tradeSummary"></ul>
+              </div>
+            </div>
+
+            <div class="summary-grid" style="margin-top:12px">
+              <div class="summary-card">
+                <h4>Partidas generales (fase)</h4>
+                <ul id="phaseSummary"></ul>
+              </div>
+              <div class="summary-card">
+                <h4>Partidas generales (trade)</h4>
+                <ul id="tradeSummary"></ul>
+              </div>
+            </div>
+
             <div class="chart-grid" style="margin-top:12px">
               <div class="chart-card">
                 <h3>S-Curve (PV / EV / AC)</h3>
@@ -1553,6 +1597,1184 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       HORIZON_DAYS = clamp(maxEnd + 3, 10, 180);
       refreshAll();
       toast('Fechas recalculadas con días no laborables');
+    }
+
+    function formatDateISO(date){
+      const y = date.getFullYear();
+      const m = String(date.getMonth()+1).padStart(2,'0');
+      const d = String(date.getDate()).padStart(2,'0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function mexicoHolidays(year){
+      return [
+        `${year}-01-01`,
+        `${year}-02-05`,
+        `${year}-03-21`,
+        `${year}-05-01`,
+        `${year}-09-16`,
+        `${year}-11-18`,
+        `${year}-12-25`,
+      ];
+    }
+
+    function parseNonWorkingDates(){
+      const raw = String(document.getElementById('nonWorkingDays')?.value || '');
+      const parts = raw.split(/[\n,]+/).map(s=>s.trim()).filter(Boolean);
+      return new Set(parts);
+    }
+
+    function isNonWorking(date, nonWorkingSet, weekendsOff){
+      const day = date.getDay();
+      const iso = formatDateISO(date);
+      if (nonWorkingSet.has(iso)) return true;
+      if (weekendsOff && (day === 0 || day === 6)) return true;
+      return false;
+    }
+
+    function nextWorkingDate(date, nonWorkingSet, weekendsOff){
+      const d = new Date(date);
+      while (isNonWorking(d, nonWorkingSet, weekendsOff)){
+        d.setDate(d.getDate() + 1);
+      }
+      return d;
+    }
+
+    function addWorkingDays(startDate, workDays, nonWorkingSet, weekendsOff){
+      let current = new Date(startDate);
+      let count = 0;
+      while (count < workDays){
+        if (!isNonWorking(current, nonWorkingSet, weekendsOff)){
+          count += 1;
+          if (count === workDays) break;
+        }
+        current.setDate(current.getDate() + 1);
+      }
+      return current;
+    }
+
+    function daysBetween(startDate, endDate){
+      const ms = 24 * 60 * 60 * 1000;
+      const start = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+      const end = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
+      return Math.round((end - start) / ms);
+    }
+
+    function normalizeTaskUnits(task, fromWeeks){
+      if (!fromWeeks) return task;
+      const start = Number(task.start||1) * DAYS_PER_WEEK;
+      const dur = Math.max(1, Number(task.dur||1)) * DAYS_PER_WEEK;
+      const baselineStart = task.baselineStart ? Number(task.baselineStart) * DAYS_PER_WEEK : task.baselineStart;
+      const baselineDur = task.baselineDur ? Math.max(1, Number(task.baselineDur||1)) * DAYS_PER_WEEK : task.baselineDur;
+      return { ...task, start, dur, baselineStart, baselineDur };
+    }
+
+    function applyLoadedData(obj){
+      if (obj.mode) state.mode = obj.mode;
+      let fromWeeks = false;
+      if (Number.isFinite(obj.horizon_days)){
+        HORIZON_DAYS = Number(obj.horizon_days);
+      } else if (Number.isFinite(obj.horizonDays)){
+        HORIZON_DAYS = Number(obj.horizonDays);
+      } else if (Number.isFinite(obj.horizonWeeks)){
+        HORIZON_DAYS = Number(obj.horizonWeeks) * DAYS_PER_WEEK;
+        fromWeeks = true;
+      }
+      if (Array.isArray(obj.tasks)){
+        state.tasks = obj.tasks.map(t => normalizeTaskUnits(t, fromWeeks));
+      }
+      if (Array.isArray(obj.milestones)){
+        state.milestones = obj.milestones.map(m=>{
+          if (fromWeeks && Number.isFinite(m.week)){
+            return { ...m, day: Number(m.week) * DAYS_PER_WEEK };
+          }
+          return m;
+        });
+      }
+      state.procurement = Array.isArray(obj.procurement) ? obj.procurement : state.procurement;
+    }
+
+    function scheduleFromStartDate(){
+      const dateValue = document.getElementById('projectStartDate')?.value;
+      if (!dateValue) return toast('Selecciona una fecha de inicio', true);
+      const startDate = new Date(dateValue + 'T00:00:00');
+      const nonWorkingSet = parseNonWorkingDates();
+      const weekendsOff = document.getElementById('weekendsOff')?.checked ?? true;
+
+      const taskByWbs = new Map();
+      state.tasks.forEach(t=>taskByWbs.set(String(t.wbs||'').trim(), t));
+      const endDates = new Map();
+
+      const sorted = [...state.tasks].sort((a,b)=>Number(a.start||0) - Number(b.start||0));
+      sorted.forEach((t, index)=>{
+        let earliestDate = startDate;
+        const predKey = String(t.pred||'').trim();
+        if (predKey && taskByWbs.has(predKey)){
+          const predTask = taskByWbs.get(predKey);
+          const predEnd = endDates.get(predTask.id);
+          if (predEnd) {
+            earliestDate = new Date(predEnd);
+            earliestDate.setDate(earliestDate.getDate() + 1);
+          }
+        } else if (index > 0){
+          const prev = sorted[index - 1];
+          const prevEnd = endDates.get(prev.id);
+          if (prevEnd) {
+            earliestDate = new Date(prevEnd);
+            earliestDate.setDate(earliestDate.getDate() + 1);
+          }
+        }
+
+        const workStart = nextWorkingDate(earliestDate, nonWorkingSet, weekendsOff);
+        const workDays = Math.max(1, Number(t.dur||1));
+        const workEnd = addWorkingDays(workStart, workDays, nonWorkingSet, weekendsOff);
+        endDates.set(t.id, workEnd);
+
+        const startOffset = daysBetween(startDate, workStart) + 1;
+        const endOffset = daysBetween(startDate, workEnd) + 1;
+        t.start = Math.max(1, startOffset);
+        t.dur = Math.max(1, endOffset - startOffset + 1);
+      });
+
+      const maxEnd = Math.max(...Array.from(endDates.values()).map(d=>daysBetween(startDate, d) + 1), HORIZON_DAYS);
+      HORIZON_DAYS = clamp(maxEnd + 3, 10, 180);
+      refreshAll();
+      toast('Fechas recalculadas con días no laborables');
+    }
+
+    function formatDateISO(date){
+      const y = date.getFullYear();
+      const m = String(date.getMonth()+1).padStart(2,'0');
+      const d = String(date.getDate()).padStart(2,'0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function mexicoHolidays(year){
+      return [
+        `${year}-01-01`,
+        `${year}-02-05`,
+        `${year}-03-21`,
+        `${year}-05-01`,
+        `${year}-09-16`,
+        `${year}-11-18`,
+        `${year}-12-25`,
+      ];
+    }
+
+    function parseNonWorkingDates(){
+      const raw = String(document.getElementById('nonWorkingDays')?.value || '');
+      const parts = raw.split(/[\n,]+/).map(s=>s.trim()).filter(Boolean);
+      return new Set(parts);
+    }
+
+    function isNonWorking(date, nonWorkingSet, weekendsOff){
+      const day = date.getDay();
+      const iso = formatDateISO(date);
+      if (nonWorkingSet.has(iso)) return true;
+      if (weekendsOff && (day === 0 || day === 6)) return true;
+      return false;
+    }
+
+    function nextWorkingDate(date, nonWorkingSet, weekendsOff){
+      const d = new Date(date);
+      while (isNonWorking(d, nonWorkingSet, weekendsOff)){
+        d.setDate(d.getDate() + 1);
+      }
+      return d;
+    }
+
+    function addWorkingDays(startDate, workDays, nonWorkingSet, weekendsOff){
+      let current = new Date(startDate);
+      let count = 0;
+      while (count < workDays){
+        if (!isNonWorking(current, nonWorkingSet, weekendsOff)){
+          count += 1;
+          if (count === workDays) break;
+        }
+        current.setDate(current.getDate() + 1);
+      }
+      return current;
+    }
+
+    function daysBetween(startDate, endDate){
+      const ms = 24 * 60 * 60 * 1000;
+      const start = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+      const end = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
+      return Math.round((end - start) / ms);
+    }
+
+    function normalizeTaskUnits(task, fromWeeks){
+      if (!fromWeeks) return task;
+      const start = Number(task.start||1) * DAYS_PER_WEEK;
+      const dur = Math.max(1, Number(task.dur||1)) * DAYS_PER_WEEK;
+      const baselineStart = task.baselineStart ? Number(task.baselineStart) * DAYS_PER_WEEK : task.baselineStart;
+      const baselineDur = task.baselineDur ? Math.max(1, Number(task.baselineDur||1)) * DAYS_PER_WEEK : task.baselineDur;
+      return { ...task, start, dur, baselineStart, baselineDur };
+    }
+
+    function applyLoadedData(obj){
+      if (obj.mode) state.mode = obj.mode;
+      let fromWeeks = false;
+      if (Number.isFinite(obj.horizon_days)){
+        HORIZON_DAYS = Number(obj.horizon_days);
+      } else if (Number.isFinite(obj.horizonDays)){
+        HORIZON_DAYS = Number(obj.horizonDays);
+      } else if (Number.isFinite(obj.horizonWeeks)){
+        HORIZON_DAYS = Number(obj.horizonWeeks) * DAYS_PER_WEEK;
+        fromWeeks = true;
+      }
+      if (Array.isArray(obj.tasks)){
+        state.tasks = obj.tasks.map(t => normalizeTaskUnits(t, fromWeeks));
+      }
+      if (Array.isArray(obj.milestones)){
+        state.milestones = obj.milestones.map(m=>{
+          if (fromWeeks && Number.isFinite(m.week)){
+            return { ...m, day: Number(m.week) * DAYS_PER_WEEK };
+          }
+          return m;
+        });
+      }
+      state.procurement = Array.isArray(obj.procurement) ? obj.procurement : state.procurement;
+    }
+
+    function scheduleFromStartDate(){
+      const dateValue = document.getElementById('projectStartDate')?.value;
+      if (!dateValue) return toast('Selecciona una fecha de inicio', true);
+      const startDate = new Date(dateValue + 'T00:00:00');
+      const nonWorkingSet = parseNonWorkingDates();
+      const weekendsOff = document.getElementById('weekendsOff')?.checked ?? true;
+
+      const taskByWbs = new Map();
+      state.tasks.forEach(t=>taskByWbs.set(String(t.wbs||'').trim(), t));
+      const endDates = new Map();
+
+      const sorted = [...state.tasks].sort((a,b)=>Number(a.start||0) - Number(b.start||0));
+      sorted.forEach((t, index)=>{
+        let earliestDate = startDate;
+        const predKey = String(t.pred||'').trim();
+        if (predKey && taskByWbs.has(predKey)){
+          const predTask = taskByWbs.get(predKey);
+          const predEnd = endDates.get(predTask.id);
+          if (predEnd) {
+            earliestDate = new Date(predEnd);
+            earliestDate.setDate(earliestDate.getDate() + 1);
+          }
+        } else if (index > 0){
+          const prev = sorted[index - 1];
+          const prevEnd = endDates.get(prev.id);
+          if (prevEnd) {
+            earliestDate = new Date(prevEnd);
+            earliestDate.setDate(earliestDate.getDate() + 1);
+          }
+        }
+
+        const workStart = nextWorkingDate(earliestDate, nonWorkingSet, weekendsOff);
+        const workDays = Math.max(1, Number(t.dur||1));
+        const workEnd = addWorkingDays(workStart, workDays, nonWorkingSet, weekendsOff);
+        endDates.set(t.id, workEnd);
+
+        const startOffset = daysBetween(startDate, workStart) + 1;
+        const endOffset = daysBetween(startDate, workEnd) + 1;
+        t.start = Math.max(1, startOffset);
+        t.dur = Math.max(1, endOffset - startOffset + 1);
+      });
+
+      const maxEnd = Math.max(...Array.from(endDates.values()).map(d=>daysBetween(startDate, d) + 1), HORIZON_DAYS);
+      HORIZON_DAYS = clamp(maxEnd + 3, 10, 180);
+      refreshAll();
+      toast('Fechas recalculadas con días no laborables');
+    }
+
+    function formatDateISO(date){
+      const y = date.getFullYear();
+      const m = String(date.getMonth()+1).padStart(2,'0');
+      const d = String(date.getDate()).padStart(2,'0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function mexicoHolidays(year){
+      return [
+        `${year}-01-01`,
+        `${year}-02-05`,
+        `${year}-03-21`,
+        `${year}-05-01`,
+        `${year}-09-16`,
+        `${year}-11-18`,
+        `${year}-12-25`,
+      ];
+    }
+
+    function parseNonWorkingDates(){
+      const raw = String(document.getElementById('nonWorkingDays')?.value || '');
+      const parts = raw.split(/[\n,]+/).map(s=>s.trim()).filter(Boolean);
+      return new Set(parts);
+    }
+
+    function isNonWorking(date, nonWorkingSet, weekendsOff){
+      const day = date.getDay();
+      const iso = formatDateISO(date);
+      if (nonWorkingSet.has(iso)) return true;
+      if (weekendsOff && (day === 0 || day === 6)) return true;
+      return false;
+    }
+
+    function nextWorkingDate(date, nonWorkingSet, weekendsOff){
+      const d = new Date(date);
+      while (isNonWorking(d, nonWorkingSet, weekendsOff)){
+        d.setDate(d.getDate() + 1);
+      }
+      return d;
+    }
+
+    function addWorkingDays(startDate, workDays, nonWorkingSet, weekendsOff){
+      let current = new Date(startDate);
+      let count = 0;
+      while (count < workDays){
+        if (!isNonWorking(current, nonWorkingSet, weekendsOff)){
+          count += 1;
+          if (count === workDays) break;
+        }
+        current.setDate(current.getDate() + 1);
+      }
+      return current;
+    }
+
+    function daysBetween(startDate, endDate){
+      const ms = 24 * 60 * 60 * 1000;
+      const start = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+      const end = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
+      return Math.round((end - start) / ms);
+    }
+
+    function normalizeTaskUnits(task, fromWeeks){
+      if (!fromWeeks) return task;
+      const start = Number(task.start||1) * DAYS_PER_WEEK;
+      const dur = Math.max(1, Number(task.dur||1)) * DAYS_PER_WEEK;
+      const baselineStart = task.baselineStart ? Number(task.baselineStart) * DAYS_PER_WEEK : task.baselineStart;
+      const baselineDur = task.baselineDur ? Math.max(1, Number(task.baselineDur||1)) * DAYS_PER_WEEK : task.baselineDur;
+      return { ...task, start, dur, baselineStart, baselineDur };
+    }
+
+    function applyLoadedData(obj){
+      if (obj.mode) state.mode = obj.mode;
+      let fromWeeks = false;
+      if (Number.isFinite(obj.horizon_days)){
+        HORIZON_DAYS = Number(obj.horizon_days);
+      } else if (Number.isFinite(obj.horizonDays)){
+        HORIZON_DAYS = Number(obj.horizonDays);
+      } else if (Number.isFinite(obj.horizonWeeks)){
+        HORIZON_DAYS = Number(obj.horizonWeeks) * DAYS_PER_WEEK;
+        fromWeeks = true;
+      }
+      if (Array.isArray(obj.tasks)){
+        state.tasks = obj.tasks.map(t => normalizeTaskUnits(t, fromWeeks));
+      }
+      if (Array.isArray(obj.milestones)){
+        state.milestones = obj.milestones.map(m=>{
+          if (fromWeeks && Number.isFinite(m.week)){
+            return { ...m, day: Number(m.week) * DAYS_PER_WEEK };
+          }
+          return m;
+        });
+      }
+      state.procurement = Array.isArray(obj.procurement) ? obj.procurement : state.procurement;
+    }
+
+    function scheduleFromStartDate(){
+      const dateValue = document.getElementById('projectStartDate')?.value;
+      if (!dateValue) return toast('Selecciona una fecha de inicio', true);
+      const startDate = new Date(dateValue + 'T00:00:00');
+      const nonWorkingSet = parseNonWorkingDates();
+      const weekendsOff = document.getElementById('weekendsOff')?.checked ?? true;
+
+      const taskByWbs = new Map();
+      state.tasks.forEach(t=>taskByWbs.set(String(t.wbs||'').trim(), t));
+      const endDates = new Map();
+
+      const sorted = [...state.tasks].sort((a,b)=>Number(a.start||0) - Number(b.start||0));
+      sorted.forEach((t, index)=>{
+        let earliestDate = startDate;
+        const predKey = String(t.pred||'').trim();
+        if (predKey && taskByWbs.has(predKey)){
+          const predTask = taskByWbs.get(predKey);
+          const predEnd = endDates.get(predTask.id);
+          if (predEnd) {
+            earliestDate = new Date(predEnd);
+            earliestDate.setDate(earliestDate.getDate() + 1);
+          }
+        } else if (index > 0){
+          const prev = sorted[index - 1];
+          const prevEnd = endDates.get(prev.id);
+          if (prevEnd) {
+            earliestDate = new Date(prevEnd);
+            earliestDate.setDate(earliestDate.getDate() + 1);
+          }
+        }
+
+        const workStart = nextWorkingDate(earliestDate, nonWorkingSet, weekendsOff);
+        const workDays = Math.max(1, Number(t.dur||1));
+        const workEnd = addWorkingDays(workStart, workDays, nonWorkingSet, weekendsOff);
+        endDates.set(t.id, workEnd);
+
+        const startOffset = daysBetween(startDate, workStart) + 1;
+        const endOffset = daysBetween(startDate, workEnd) + 1;
+        t.start = Math.max(1, startOffset);
+        t.dur = Math.max(1, endOffset - startOffset + 1);
+      });
+
+      const maxEnd = Math.max(...Array.from(endDates.values()).map(d=>daysBetween(startDate, d) + 1), HORIZON_DAYS);
+      HORIZON_DAYS = clamp(maxEnd + 3, 10, 180);
+      refreshAll();
+      toast('Fechas recalculadas con días no laborables');
+    }
+
+    function formatDateISO(date){
+      const y = date.getFullYear();
+      const m = String(date.getMonth()+1).padStart(2,'0');
+      const d = String(date.getDate()).padStart(2,'0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function mexicoHolidays(year){
+      return [
+        `${year}-01-01`,
+        `${year}-02-05`,
+        `${year}-03-21`,
+        `${year}-05-01`,
+        `${year}-09-16`,
+        `${year}-11-18`,
+        `${year}-12-25`,
+      ];
+    }
+
+    function parseNonWorkingDates(){
+      const raw = String(document.getElementById('nonWorkingDays')?.value || '');
+      const parts = raw.split(/[\n,]+/).map(s=>s.trim()).filter(Boolean);
+      return new Set(parts);
+    }
+
+    function isNonWorking(date, nonWorkingSet, weekendsOff){
+      const day = date.getDay();
+      const iso = formatDateISO(date);
+      if (nonWorkingSet.has(iso)) return true;
+      if (weekendsOff && (day === 0 || day === 6)) return true;
+      return false;
+    }
+
+    function nextWorkingDate(date, nonWorkingSet, weekendsOff){
+      const d = new Date(date);
+      while (isNonWorking(d, nonWorkingSet, weekendsOff)){
+        d.setDate(d.getDate() + 1);
+      }
+      return d;
+    }
+
+    function addWorkingDays(startDate, workDays, nonWorkingSet, weekendsOff){
+      let current = new Date(startDate);
+      let count = 0;
+      while (count < workDays){
+        if (!isNonWorking(current, nonWorkingSet, weekendsOff)){
+          count += 1;
+          if (count === workDays) break;
+        }
+        current.setDate(current.getDate() + 1);
+      }
+      return current;
+    }
+
+    function daysBetween(startDate, endDate){
+      const ms = 24 * 60 * 60 * 1000;
+      const start = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+      const end = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
+      return Math.round((end - start) / ms);
+    }
+
+    function normalizeTaskUnits(task, fromWeeks){
+      if (!fromWeeks) return task;
+      const start = Number(task.start||1) * DAYS_PER_WEEK;
+      const dur = Math.max(1, Number(task.dur||1)) * DAYS_PER_WEEK;
+      const baselineStart = task.baselineStart ? Number(task.baselineStart) * DAYS_PER_WEEK : task.baselineStart;
+      const baselineDur = task.baselineDur ? Math.max(1, Number(task.baselineDur||1)) * DAYS_PER_WEEK : task.baselineDur;
+      return { ...task, start, dur, baselineStart, baselineDur };
+    }
+
+    function applyLoadedData(obj){
+      if (obj.mode) state.mode = obj.mode;
+      let fromWeeks = false;
+      if (Number.isFinite(obj.horizon_days)){
+        HORIZON_DAYS = Number(obj.horizon_days);
+      } else if (Number.isFinite(obj.horizonDays)){
+        HORIZON_DAYS = Number(obj.horizonDays);
+      } else if (Number.isFinite(obj.horizonWeeks)){
+        HORIZON_DAYS = Number(obj.horizonWeeks) * DAYS_PER_WEEK;
+        fromWeeks = true;
+      }
+      if (Array.isArray(obj.tasks)){
+        state.tasks = obj.tasks.map(t => normalizeTaskUnits(t, fromWeeks));
+      }
+      if (Array.isArray(obj.milestones)){
+        state.milestones = obj.milestones.map(m=>{
+          if (fromWeeks && Number.isFinite(m.week)){
+            return { ...m, day: Number(m.week) * DAYS_PER_WEEK };
+          }
+          return m;
+        });
+      }
+      state.procurement = Array.isArray(obj.procurement) ? obj.procurement : state.procurement;
+    }
+
+    function scheduleFromStartDate(){
+      const dateValue = document.getElementById('projectStartDate')?.value;
+      if (!dateValue) return toast('Selecciona una fecha de inicio', true);
+      const startDate = new Date(dateValue + 'T00:00:00');
+      const nonWorkingSet = parseNonWorkingDates();
+      const weekendsOff = document.getElementById('weekendsOff')?.checked ?? true;
+
+      const taskByWbs = new Map();
+      state.tasks.forEach(t=>taskByWbs.set(String(t.wbs||'').trim(), t));
+      const endDates = new Map();
+
+      const sorted = [...state.tasks].sort((a,b)=>Number(a.start||0) - Number(b.start||0));
+      sorted.forEach((t, index)=>{
+        let earliestDate = startDate;
+        const predKey = String(t.pred||'').trim();
+        if (predKey && taskByWbs.has(predKey)){
+          const predTask = taskByWbs.get(predKey);
+          const predEnd = endDates.get(predTask.id);
+          if (predEnd) {
+            earliestDate = new Date(predEnd);
+            earliestDate.setDate(earliestDate.getDate() + 1);
+          }
+        } else if (index > 0){
+          const prev = sorted[index - 1];
+          const prevEnd = endDates.get(prev.id);
+          if (prevEnd) {
+            earliestDate = new Date(prevEnd);
+            earliestDate.setDate(earliestDate.getDate() + 1);
+          }
+        }
+
+        const workStart = nextWorkingDate(earliestDate, nonWorkingSet, weekendsOff);
+        const workDays = Math.max(1, Number(t.dur||1));
+        const workEnd = addWorkingDays(workStart, workDays, nonWorkingSet, weekendsOff);
+        endDates.set(t.id, workEnd);
+
+        const startOffset = daysBetween(startDate, workStart) + 1;
+        const endOffset = daysBetween(startDate, workEnd) + 1;
+        t.start = Math.max(1, startOffset);
+        t.dur = Math.max(1, endOffset - startOffset + 1);
+      });
+
+      const maxEnd = Math.max(...Array.from(endDates.values()).map(d=>daysBetween(startDate, d) + 1), HORIZON_DAYS);
+      HORIZON_DAYS = clamp(maxEnd + 3, 10, 180);
+      refreshAll();
+      toast('Fechas recalculadas con días no laborables');
+    }
+
+    function formatDateISO(date){
+      const y = date.getFullYear();
+      const m = String(date.getMonth()+1).padStart(2,'0');
+      const d = String(date.getDate()).padStart(2,'0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function mexicoHolidays(year){
+      return [
+        `${year}-01-01`,
+        `${year}-02-05`,
+        `${year}-03-21`,
+        `${year}-05-01`,
+        `${year}-09-16`,
+        `${year}-11-18`,
+        `${year}-12-25`,
+      ];
+    }
+
+    function parseNonWorkingDates(){
+      const raw = String(document.getElementById('nonWorkingDays')?.value || '');
+      const parts = raw.split(/[\n,]+/).map(s=>s.trim()).filter(Boolean);
+      return new Set(parts);
+    }
+
+    function isNonWorking(date, nonWorkingSet, weekendsOff){
+      const day = date.getDay();
+      const iso = formatDateISO(date);
+      if (nonWorkingSet.has(iso)) return true;
+      if (weekendsOff && (day === 0 || day === 6)) return true;
+      return false;
+    }
+
+    function nextWorkingDate(date, nonWorkingSet, weekendsOff){
+      const d = new Date(date);
+      while (isNonWorking(d, nonWorkingSet, weekendsOff)){
+        d.setDate(d.getDate() + 1);
+      }
+      return d;
+    }
+
+    function addWorkingDays(startDate, workDays, nonWorkingSet, weekendsOff){
+      let current = new Date(startDate);
+      let count = 0;
+      while (count < workDays){
+        if (!isNonWorking(current, nonWorkingSet, weekendsOff)){
+          count += 1;
+          if (count === workDays) break;
+        }
+        current.setDate(current.getDate() + 1);
+      }
+      return current;
+    }
+
+    function daysBetween(startDate, endDate){
+      const ms = 24 * 60 * 60 * 1000;
+      const start = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+      const end = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
+      return Math.round((end - start) / ms);
+    }
+
+    function normalizeTaskUnits(task, fromWeeks){
+      if (!fromWeeks) return task;
+      const start = Number(task.start||1) * DAYS_PER_WEEK;
+      const dur = Math.max(1, Number(task.dur||1)) * DAYS_PER_WEEK;
+      const baselineStart = task.baselineStart ? Number(task.baselineStart) * DAYS_PER_WEEK : task.baselineStart;
+      const baselineDur = task.baselineDur ? Math.max(1, Number(task.baselineDur||1)) * DAYS_PER_WEEK : task.baselineDur;
+      return { ...task, start, dur, baselineStart, baselineDur };
+    }
+
+    function applyLoadedData(obj){
+      if (obj.mode) state.mode = obj.mode;
+      let fromWeeks = false;
+      if (Number.isFinite(obj.horizon_days)){
+        HORIZON_DAYS = Number(obj.horizon_days);
+      } else if (Number.isFinite(obj.horizonDays)){
+        HORIZON_DAYS = Number(obj.horizonDays);
+      } else if (Number.isFinite(obj.horizonWeeks)){
+        HORIZON_DAYS = Number(obj.horizonWeeks) * DAYS_PER_WEEK;
+        fromWeeks = true;
+      }
+      if (Array.isArray(obj.tasks)){
+        state.tasks = obj.tasks.map(t => normalizeTaskUnits(t, fromWeeks));
+      }
+      if (Array.isArray(obj.milestones)){
+        state.milestones = obj.milestones.map(m=>{
+          if (fromWeeks && Number.isFinite(m.week)){
+            return { ...m, day: Number(m.week) * DAYS_PER_WEEK };
+          }
+          return m;
+        });
+      }
+      state.procurement = Array.isArray(obj.procurement) ? obj.procurement : state.procurement;
+    }
+
+    function scheduleFromStartDate(){
+      const dateValue = document.getElementById('projectStartDate')?.value;
+      if (!dateValue) return toast('Selecciona una fecha de inicio', true);
+      const startDate = new Date(dateValue + 'T00:00:00');
+      const nonWorkingSet = parseNonWorkingDates();
+      const weekendsOff = document.getElementById('weekendsOff')?.checked ?? true;
+
+      const taskByWbs = new Map();
+      state.tasks.forEach(t=>taskByWbs.set(String(t.wbs||'').trim(), t));
+      const endDates = new Map();
+
+      const sorted = [...state.tasks].sort((a,b)=>Number(a.start||0) - Number(b.start||0));
+      sorted.forEach((t, index)=>{
+        let earliestDate = startDate;
+        const predKey = String(t.pred||'').trim();
+        if (predKey && taskByWbs.has(predKey)){
+          const predTask = taskByWbs.get(predKey);
+          const predEnd = endDates.get(predTask.id);
+          if (predEnd) {
+            earliestDate = new Date(predEnd);
+            earliestDate.setDate(earliestDate.getDate() + 1);
+          }
+        } else if (index > 0){
+          const prev = sorted[index - 1];
+          const prevEnd = endDates.get(prev.id);
+          if (prevEnd) {
+            earliestDate = new Date(prevEnd);
+            earliestDate.setDate(earliestDate.getDate() + 1);
+          }
+        }
+
+        const workStart = nextWorkingDate(earliestDate, nonWorkingSet, weekendsOff);
+        const workDays = Math.max(1, Number(t.dur||1));
+        const workEnd = addWorkingDays(workStart, workDays, nonWorkingSet, weekendsOff);
+        endDates.set(t.id, workEnd);
+
+        const startOffset = daysBetween(startDate, workStart) + 1;
+        const endOffset = daysBetween(startDate, workEnd) + 1;
+        t.start = Math.max(1, startOffset);
+        t.dur = Math.max(1, endOffset - startOffset + 1);
+      });
+
+      const maxEnd = Math.max(...Array.from(endDates.values()).map(d=>daysBetween(startDate, d) + 1), HORIZON_DAYS);
+      HORIZON_DAYS = clamp(maxEnd + 3, 10, 180);
+      refreshAll();
+      toast('Fechas recalculadas con días no laborables');
+    }
+
+    function formatDateISO(date){
+      const y = date.getFullYear();
+      const m = String(date.getMonth()+1).padStart(2,'0');
+      const d = String(date.getDate()).padStart(2,'0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function mexicoHolidays(year){
+      return [
+        `${year}-01-01`,
+        `${year}-02-05`,
+        `${year}-03-21`,
+        `${year}-05-01`,
+        `${year}-09-16`,
+        `${year}-11-18`,
+        `${year}-12-25`,
+      ];
+    }
+
+    function parseNonWorkingDates(){
+      const raw = String(document.getElementById('nonWorkingDays')?.value || '');
+      const parts = raw.split(/[\n,]+/).map(s=>s.trim()).filter(Boolean);
+      return new Set(parts);
+    }
+
+    function isNonWorking(date, nonWorkingSet, weekendsOff){
+      const day = date.getDay();
+      const iso = formatDateISO(date);
+      if (nonWorkingSet.has(iso)) return true;
+      if (weekendsOff && (day === 0 || day === 6)) return true;
+      return false;
+    }
+
+    function nextWorkingDate(date, nonWorkingSet, weekendsOff){
+      const d = new Date(date);
+      while (isNonWorking(d, nonWorkingSet, weekendsOff)){
+        d.setDate(d.getDate() + 1);
+      }
+      return d;
+    }
+
+    function addWorkingDays(startDate, workDays, nonWorkingSet, weekendsOff){
+      let current = new Date(startDate);
+      let count = 0;
+      while (count < workDays){
+        if (!isNonWorking(current, nonWorkingSet, weekendsOff)){
+          count += 1;
+          if (count === workDays) break;
+        }
+        current.setDate(current.getDate() + 1);
+      }
+      return current;
+    }
+
+    function daysBetween(startDate, endDate){
+      const ms = 24 * 60 * 60 * 1000;
+      const start = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+      const end = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
+      return Math.round((end - start) / ms);
+    }
+
+    function normalizeTaskUnits(task, fromWeeks){
+      if (!fromWeeks) return task;
+      const start = Number(task.start||1) * DAYS_PER_WEEK;
+      const dur = Math.max(1, Number(task.dur||1)) * DAYS_PER_WEEK;
+      const baselineStart = task.baselineStart ? Number(task.baselineStart) * DAYS_PER_WEEK : task.baselineStart;
+      const baselineDur = task.baselineDur ? Math.max(1, Number(task.baselineDur||1)) * DAYS_PER_WEEK : task.baselineDur;
+      return { ...task, start, dur, baselineStart, baselineDur };
+    }
+
+    function applyLoadedData(obj){
+      if (obj.mode) state.mode = obj.mode;
+      let fromWeeks = false;
+      if (Number.isFinite(obj.horizon_days)){
+        HORIZON_DAYS = Number(obj.horizon_days);
+      } else if (Number.isFinite(obj.horizonDays)){
+        HORIZON_DAYS = Number(obj.horizonDays);
+      } else if (Number.isFinite(obj.horizonWeeks)){
+        HORIZON_DAYS = Number(obj.horizonWeeks) * DAYS_PER_WEEK;
+        fromWeeks = true;
+      }
+      if (Array.isArray(obj.tasks)){
+        state.tasks = obj.tasks.map(t => normalizeTaskUnits(t, fromWeeks));
+      }
+      if (Array.isArray(obj.milestones)){
+        state.milestones = obj.milestones.map(m=>{
+          if (fromWeeks && Number.isFinite(m.week)){
+            return { ...m, day: Number(m.week) * DAYS_PER_WEEK };
+          }
+          return m;
+        });
+      }
+      state.procurement = Array.isArray(obj.procurement) ? obj.procurement : state.procurement;
+    }
+
+    function scheduleFromStartDate(){
+      const dateValue = document.getElementById('projectStartDate')?.value;
+      if (!dateValue) return toast('Selecciona una fecha de inicio', true);
+      const startDate = new Date(dateValue + 'T00:00:00');
+      const nonWorkingSet = parseNonWorkingDates();
+      const weekendsOff = document.getElementById('weekendsOff')?.checked ?? true;
+
+      const taskByWbs = new Map();
+      state.tasks.forEach(t=>taskByWbs.set(String(t.wbs||'').trim(), t));
+      const endDates = new Map();
+
+      const sorted = [...state.tasks].sort((a,b)=>Number(a.start||0) - Number(b.start||0));
+      sorted.forEach((t, index)=>{
+        let earliestDate = startDate;
+        const predKey = String(t.pred||'').trim();
+        if (predKey && taskByWbs.has(predKey)){
+          const predTask = taskByWbs.get(predKey);
+          const predEnd = endDates.get(predTask.id);
+          if (predEnd) {
+            earliestDate = new Date(predEnd);
+            earliestDate.setDate(earliestDate.getDate() + 1);
+          }
+        } else if (index > 0){
+          const prev = sorted[index - 1];
+          const prevEnd = endDates.get(prev.id);
+          if (prevEnd) {
+            earliestDate = new Date(prevEnd);
+            earliestDate.setDate(earliestDate.getDate() + 1);
+          }
+        }
+
+        const workStart = nextWorkingDate(earliestDate, nonWorkingSet, weekendsOff);
+        const workDays = Math.max(1, Number(t.dur||1));
+        const workEnd = addWorkingDays(workStart, workDays, nonWorkingSet, weekendsOff);
+        endDates.set(t.id, workEnd);
+
+        const startOffset = daysBetween(startDate, workStart) + 1;
+        const endOffset = daysBetween(startDate, workEnd) + 1;
+        t.start = Math.max(1, startOffset);
+        t.dur = Math.max(1, endOffset - startOffset + 1);
+      });
+
+      const maxEnd = Math.max(...Array.from(endDates.values()).map(d=>daysBetween(startDate, d) + 1), HORIZON_DAYS);
+      HORIZON_DAYS = clamp(maxEnd + 3, 10, 180);
+      refreshAll();
+      toast('Fechas recalculadas con días no laborables');
+    }
+
+    function formatDateISO(date){
+      const y = date.getFullYear();
+      const m = String(date.getMonth()+1).padStart(2,'0');
+      const d = String(date.getDate()).padStart(2,'0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function mexicoHolidays(year){
+      return [
+        `${year}-01-01`,
+        `${year}-02-05`,
+        `${year}-03-21`,
+        `${year}-05-01`,
+        `${year}-09-16`,
+        `${year}-11-18`,
+        `${year}-12-25`,
+      ];
+    }
+
+    function parseNonWorkingDates(){
+      const raw = String(document.getElementById('nonWorkingDays')?.value || '');
+      const parts = raw.split(/[\n,]+/).map(s=>s.trim()).filter(Boolean);
+      return new Set(parts);
+    }
+
+    function isNonWorking(date, nonWorkingSet, weekendsOff){
+      const day = date.getDay();
+      const iso = formatDateISO(date);
+      if (nonWorkingSet.has(iso)) return true;
+      if (weekendsOff && (day === 0 || day === 6)) return true;
+      return false;
+    }
+
+    function nextWorkingDate(date, nonWorkingSet, weekendsOff){
+      const d = new Date(date);
+      while (isNonWorking(d, nonWorkingSet, weekendsOff)){
+        d.setDate(d.getDate() + 1);
+      }
+      return d;
+    }
+
+    function addWorkingDays(startDate, workDays, nonWorkingSet, weekendsOff){
+      let current = new Date(startDate);
+      let count = 0;
+      while (count < workDays){
+        if (!isNonWorking(current, nonWorkingSet, weekendsOff)){
+          count += 1;
+          if (count === workDays) break;
+        }
+        current.setDate(current.getDate() + 1);
+      }
+      return current;
+    }
+
+    function daysBetween(startDate, endDate){
+      const ms = 24 * 60 * 60 * 1000;
+      const start = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+      const end = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
+      return Math.round((end - start) / ms);
+    }
+
+    function normalizeTaskUnits(task, fromWeeks){
+      if (!fromWeeks) return task;
+      const start = Number(task.start||1) * DAYS_PER_WEEK;
+      const dur = Math.max(1, Number(task.dur||1)) * DAYS_PER_WEEK;
+      const baselineStart = task.baselineStart ? Number(task.baselineStart) * DAYS_PER_WEEK : task.baselineStart;
+      const baselineDur = task.baselineDur ? Math.max(1, Number(task.baselineDur||1)) * DAYS_PER_WEEK : task.baselineDur;
+      return { ...task, start, dur, baselineStart, baselineDur };
+    }
+
+    function applyLoadedData(obj){
+      if (obj.mode) state.mode = obj.mode;
+      let fromWeeks = false;
+      if (Number.isFinite(obj.horizon_days)){
+        HORIZON_DAYS = Number(obj.horizon_days);
+      } else if (Number.isFinite(obj.horizonDays)){
+        HORIZON_DAYS = Number(obj.horizonDays);
+      } else if (Number.isFinite(obj.horizonWeeks)){
+        HORIZON_DAYS = Number(obj.horizonWeeks) * DAYS_PER_WEEK;
+        fromWeeks = true;
+      }
+      if (Array.isArray(obj.tasks)){
+        state.tasks = obj.tasks.map(t => normalizeTaskUnits(t, fromWeeks));
+      }
+      if (Array.isArray(obj.milestones)){
+        state.milestones = obj.milestones.map(m=>{
+          if (fromWeeks && Number.isFinite(m.week)){
+            return { ...m, day: Number(m.week) * DAYS_PER_WEEK };
+          }
+          return m;
+        });
+      }
+      state.procurement = Array.isArray(obj.procurement) ? obj.procurement : state.procurement;
+    }
+
+    function scheduleFromStartDate(){
+      const dateValue = document.getElementById('projectStartDate')?.value;
+      if (!dateValue) return toast('Selecciona una fecha de inicio', true);
+      const startDate = new Date(dateValue + 'T00:00:00');
+      const nonWorkingSet = parseNonWorkingDates();
+      const weekendsOff = document.getElementById('weekendsOff')?.checked ?? true;
+
+      const taskByWbs = new Map();
+      state.tasks.forEach(t=>taskByWbs.set(String(t.wbs||'').trim(), t));
+      const endDates = new Map();
+
+      const sorted = [...state.tasks].sort((a,b)=>Number(a.start||0) - Number(b.start||0));
+      sorted.forEach((t, index)=>{
+        let earliestDate = startDate;
+        const predKey = String(t.pred||'').trim();
+        if (predKey && taskByWbs.has(predKey)){
+          const predTask = taskByWbs.get(predKey);
+          const predEnd = endDates.get(predTask.id);
+          if (predEnd) {
+            earliestDate = new Date(predEnd);
+            earliestDate.setDate(earliestDate.getDate() + 1);
+          }
+        } else if (index > 0){
+          const prev = sorted[index - 1];
+          const prevEnd = endDates.get(prev.id);
+          if (prevEnd) {
+            earliestDate = new Date(prevEnd);
+            earliestDate.setDate(earliestDate.getDate() + 1);
+          }
+        }
+
+        const workStart = nextWorkingDate(earliestDate, nonWorkingSet, weekendsOff);
+        const workDays = Math.max(1, Number(t.dur||1));
+        const workEnd = addWorkingDays(workStart, workDays, nonWorkingSet, weekendsOff);
+        endDates.set(t.id, workEnd);
+
+        const startOffset = daysBetween(startDate, workStart) + 1;
+        const endOffset = daysBetween(startDate, workEnd) + 1;
+        t.start = Math.max(1, startOffset);
+        t.dur = Math.max(1, endOffset - startOffset + 1);
+      });
+
+      const maxEnd = Math.max(...Array.from(endDates.values()).map(d=>daysBetween(startDate, d) + 1), HORIZON_DAYS);
+      HORIZON_DAYS = clamp(maxEnd + 3, 10, 180);
+      refreshAll();
+      toast('Fechas recalculadas con días no laborables');
+    }
+
+    function formatDateISO(date){
+      const y = date.getFullYear();
+      const m = String(date.getMonth()+1).padStart(2,'0');
+      const d = String(date.getDate()).padStart(2,'0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function mexicoHolidays(year){
+      return [
+        `${year}-01-01`,
+        `${year}-02-05`,
+        `${year}-03-21`,
+        `${year}-05-01`,
+        `${year}-09-16`,
+        `${year}-11-18`,
+        `${year}-12-25`,
+      ];
+    }
+
+    function parseNonWorkingDates(){
+      const raw = String(document.getElementById('nonWorkingDays')?.value || '');
+      const parts = raw.split(/[\n,]+/).map(s=>s.trim()).filter(Boolean);
+      return new Set(parts);
+    }
+
+    function isNonWorking(date, nonWorkingSet, weekendsOff){
+      const day = date.getDay();
+      const iso = formatDateISO(date);
+      if (nonWorkingSet.has(iso)) return true;
+      if (weekendsOff && (day === 0 || day === 6)) return true;
+      return false;
+    }
+
+    function nextWorkingDate(date, nonWorkingSet, weekendsOff){
+      const d = new Date(date);
+      while (isNonWorking(d, nonWorkingSet, weekendsOff)){
+        d.setDate(d.getDate() + 1);
+      }
+      return d;
+    }
+
+    function addWorkingDays(startDate, workDays, nonWorkingSet, weekendsOff){
+      let current = new Date(startDate);
+      let count = 0;
+      while (count < workDays){
+        if (!isNonWorking(current, nonWorkingSet, weekendsOff)){
+          count += 1;
+          if (count === workDays) break;
+        }
+        current.setDate(current.getDate() + 1);
+      }
+      return current;
+    }
+
+    function daysBetween(startDate, endDate){
+      const ms = 24 * 60 * 60 * 1000;
+      const start = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+      const end = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
+      return Math.round((end - start) / ms);
+    }
+
+    function normalizeTaskUnits(task, fromWeeks){
+      if (!fromWeeks) return task;
+      const start = Number(task.start||1) * DAYS_PER_WEEK;
+      const dur = Math.max(1, Number(task.dur||1)) * DAYS_PER_WEEK;
+      const baselineStart = task.baselineStart ? Number(task.baselineStart) * DAYS_PER_WEEK : task.baselineStart;
+      const baselineDur = task.baselineDur ? Math.max(1, Number(task.baselineDur||1)) * DAYS_PER_WEEK : task.baselineDur;
+      return { ...task, start, dur, baselineStart, baselineDur };
+    }
+
+    function applyLoadedData(obj){
+      if (obj.mode) state.mode = obj.mode;
+      let fromWeeks = false;
+      if (Number.isFinite(obj.horizon_days)){
+        HORIZON_DAYS = Number(obj.horizon_days);
+      } else if (Number.isFinite(obj.horizonDays)){
+        HORIZON_DAYS = Number(obj.horizonDays);
+      } else if (Number.isFinite(obj.horizonWeeks)){
+        HORIZON_DAYS = Number(obj.horizonWeeks) * DAYS_PER_WEEK;
+        fromWeeks = true;
+      }
+      if (Array.isArray(obj.tasks)){
+        state.tasks = obj.tasks.map(t => normalizeTaskUnits(t, fromWeeks));
+      }
+      if (Array.isArray(obj.milestones)){
+        state.milestones = obj.milestones.map(m=>{
+          if (fromWeeks && Number.isFinite(m.week)){
+            return { ...m, day: Number(m.week) * DAYS_PER_WEEK };
+          }
+          return m;
+        });
+      }
+      state.procurement = Array.isArray(obj.procurement) ? obj.procurement : state.procurement;
+    }
+
+    function scheduleFromStartDate(){
+      const dateValue = document.getElementById('projectStartDate')?.value;
+      if (!dateValue) return toast('Selecciona una fecha de inicio', true);
+      const startDate = new Date(dateValue + 'T00:00:00');
+      const nonWorkingSet = parseNonWorkingDates();
+      const weekendsOff = document.getElementById('weekendsOff')?.checked ?? true;
+
+      const taskByWbs = new Map();
+      state.tasks.forEach(t=>taskByWbs.set(String(t.wbs||'').trim(), t));
+      const endDates = new Map();
+
+      const sorted = [...state.tasks].sort((a,b)=>Number(a.start||0) - Number(b.start||0));
+      sorted.forEach((t, index)=>{
+        let earliestDate = startDate;
+        const predKey = String(t.pred||'').trim();
+        if (predKey && taskByWbs.has(predKey)){
+          const predTask = taskByWbs.get(predKey);
+          const predEnd = endDates.get(predTask.id);
+          if (predEnd) {
+            earliestDate = new Date(predEnd);
+            earliestDate.setDate(earliestDate.getDate() + 1);
+          }
+        } else if (index > 0){
+          const prev = sorted[index - 1];
+          const prevEnd = endDates.get(prev.id);
+          if (prevEnd) {
+            earliestDate = new Date(prevEnd);
+            earliestDate.setDate(earliestDate.getDate() + 1);
+          }
+        }
+
+        const workStart = nextWorkingDate(earliestDate, nonWorkingSet, weekendsOff);
+        const workDays = Math.max(1, Number(t.dur||1));
+        const workEnd = addWorkingDays(workStart, workDays, nonWorkingSet, weekendsOff);
+        endDates.set(t.id, workEnd);
+
+        const startOffset = daysBetween(startDate, workStart) + 1;
+        const endOffset = daysBetween(startDate, workEnd) + 1;
+        t.start = Math.max(1, startOffset);
+        t.dur = Math.max(1, endOffset - startOffset + 1);
+      });
+
+      const maxEnd = Math.max(...Array.from(endDates.values()).map(d=>daysBetween(startDate, d) + 1), HORIZON_DAYS);
+      HORIZON_DAYS = clamp(maxEnd + 3, 10, 180);
+      refreshAll();
+      toast('Fechas recalculadas con días no laborables');
+    }
+
+    function normalizeTaskUnits(task, fromWeeks){
+      if (!fromWeeks) return task;
+      const start = Number(task.start||1) * DAYS_PER_WEEK;
+      const dur = Math.max(1, Number(task.dur||1)) * DAYS_PER_WEEK;
+      const baselineStart = task.baselineStart ? Number(task.baselineStart) * DAYS_PER_WEEK : task.baselineStart;
+      const baselineDur = task.baselineDur ? Math.max(1, Number(task.baselineDur||1)) * DAYS_PER_WEEK : task.baselineDur;
+      return { ...task, start, dur, baselineStart, baselineDur };
+    }
+
+    function applyLoadedData(obj){
+      if (obj.mode) state.mode = obj.mode;
+      let fromWeeks = false;
+      if (Number.isFinite(obj.horizon_days)){
+        HORIZON_DAYS = Number(obj.horizon_days);
+      } else if (Number.isFinite(obj.horizonDays)){
+        HORIZON_DAYS = Number(obj.horizonDays);
+      } else if (Number.isFinite(obj.horizonWeeks)){
+        HORIZON_DAYS = Number(obj.horizonWeeks) * DAYS_PER_WEEK;
+        fromWeeks = true;
+      }
+      if (Array.isArray(obj.tasks)){
+        state.tasks = obj.tasks.map(t => normalizeTaskUnits(t, fromWeeks));
+      }
+      if (Array.isArray(obj.milestones)){
+        state.milestones = obj.milestones.map(m=>{
+          if (fromWeeks && Number.isFinite(m.week)){
+            return { ...m, day: Number(m.week) * DAYS_PER_WEEK };
+          }
+          return m;
+        });
+      }
+      state.procurement = Array.isArray(obj.procurement) ? obj.procurement : state.procurement;
     }
 
     function toast(msg, bad=false){
