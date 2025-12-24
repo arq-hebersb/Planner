@@ -32,16 +32,16 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       --rum-btn:#F6A868;
 
       --text-main:#0b1220;
-      --text-muted:#6b7280;
+      --text-muted:#4b5563;
 
-      --glass: rgba(255,255,255,.10);
-      --glass-2: rgba(255,255,255,.14);
-      --glass-border: rgba(255,255,255,.18);
+      --glass: rgba(255,255,255,.65);
+      --glass-2: rgba(255,255,255,.82);
+      --glass-border: rgba(17,24,39,.08);
 
-      --card: rgba(255,255,255,0.92);
-      --card-2: rgba(255,255,255,0.86);
-      --line: rgba(17,24,39,0.14);
-      --shadow: 0 18px 50px rgba(0,0,0,.35);
+      --card: #ffffff;
+      --card-2: #f8fafc;
+      --line: rgba(17,24,39,0.12);
+      --shadow: 0 20px 40px rgba(15,23,42,.12);
 
       --danger:#dc2626;
       --warn:#f59e0b;
@@ -53,14 +53,14 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
 .rum-planner-page{
       margin:0;
       font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      background: radial-gradient(circle at top, #222538 0, #05060a 55%);
-      color: #F4F2ED;
+      background: radial-gradient(circle at top, #ffffff 0, #eef2f7 60%);
+      color: var(--text-main);
       overflow-x:hidden;
     }
 .rum-planner-page a{ color:inherit; text-decoration:none; }
 
     /* Stars */
-    .stars-container{ position:fixed; inset:0; pointer-events:none; opacity:.65; }
+    .stars-container{ position:fixed; inset:0; pointer-events:none; opacity:.12; }
     .stars-container::before, .stars-container::after{
       content:"";
       position:absolute; inset:-20%;
@@ -92,7 +92,7 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       background: radial-gradient(circle at 30% 30%, rgba(0,191,255,.24), rgba(0,191,255,0) 60%),
                   radial-gradient(circle at 70% 70%, rgba(246,168,104,.18), rgba(246,168,104,0) 65%);
       filter: blur(0.2px);
-      opacity:.65;
+      opacity:.32;
       pointer-events:none;
       animation: floaty 10s ease-in-out infinite;
       mix-blend-mode: screen;
@@ -121,11 +121,11 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
     }
 
     .nav-fallback{
-      background: rgba(10,12,18,.55);
-      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.92);
+      border: 1px solid rgba(17,24,39,.10);
       border-radius: 16px;
       padding: 10px 14px;
-      box-shadow: 0 16px 40px rgba(0,0,0,.35);
+      box-shadow: 0 16px 40px rgba(15,23,42,.12);
       display:flex; align-items:center; justify-content:space-between;
     }
     .nav-fallback .brand{
@@ -135,8 +135,8 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       width:38px; height:38px; border-radius:12px;
       display:grid; place-items:center;
       font-weight:800;
-      background: linear-gradient(135deg, rgba(0,191,255,.35), rgba(246,168,104,.25));
-      border: 1px solid rgba(255,255,255,.15);
+      background: linear-gradient(135deg, rgba(59,130,246,.20), rgba(246,168,104,.18));
+      border: 1px solid rgba(17,24,39,.10);
     }
     .nav-fallback .ch{ font-family:"Baloo 2"; font-size:18px; }
     .nav-fallback .right{
@@ -159,7 +159,7 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
     }
     .page-head p{
       margin:6px 0 0;
-      color: rgba(244,242,237,.82);
+      color: var(--text-muted);
       max-width: 900px;
       line-height:1.4;
       font-size:14px;
@@ -168,10 +168,11 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
     .chip{
       padding: 8px 10px;
       border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(17,24,39,.12);
+      background: rgba(255,255,255,.9);
       font-size: 12px;
       white-space:nowrap;
+      color: #111827;
     }
 
     /* Cards layout */
@@ -188,10 +189,11 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
 
     .panel{
       border-radius: 18px;
-      background: rgba(10,12,18,.55);
-      border: 1px solid rgba(255,255,255,.14);
+      background: var(--card);
+      border: 1px solid var(--line);
       box-shadow: var(--shadow);
       overflow:hidden;
+      color: #111827;
     }
     .panel-header{
       display:flex;
@@ -199,8 +201,8 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       justify-content:space-between;
       gap:12px;
       padding: 14px 16px;
-      background: rgba(255,255,255,.06);
-      border-bottom: 1px solid rgba(255,255,255,.12);
+      background: #f8fafc;
+      border-bottom: 1px solid rgba(15,23,42,.08);
     }
     .panel-header h2{
       margin:0;
@@ -211,7 +213,7 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
     .panel-header p{
       margin:6px 0 0;
       font-size: 12px;
-      color: rgba(244,242,237,.78);
+      color: #4b5563;
       line-height: 1.35;
     }
     .panel-body{ padding: 14px 16px; }
@@ -224,9 +226,9 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
     }
 
     .btn{
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.10);
-      color: #F4F2ED;
+      border: 1px solid rgba(15,23,42,.14);
+      background: rgba(255,255,255,.9);
+      color: #111827;
       padding: 9px 12px;
       border-radius: 12px;
       font-weight: 700;
@@ -236,7 +238,7 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       user-select:none;
       white-space:nowrap;
     }
-    .btn:hover{ transform: translateY(-1px); border-color: rgba(255,255,255,.22); background: rgba(255,255,255,.14); }
+    .btn:hover{ transform: translateY(-1px); border-color: rgba(15,23,42,.22); background: #ffffff; }
     .btn:active{ transform: translateY(0); }
     .btn-primary{ background: rgba(42,109,176,.22); border-color: rgba(42,109,176,.38); }
     .btn-warn{ background: rgba(245,158,11,.18); border-color: rgba(245,158,11,.35); }
@@ -309,10 +311,10 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
 
     .pill-toggle{
       display:flex;
-      border:1px solid rgba(255,255,255,.18);
+      border:1px solid rgba(15,23,42,.12);
       border-radius: 999px;
       overflow:hidden;
-      background: rgba(255,255,255,.06);
+      background: #ffffff;
     }
     .pill-toggle button{
       border:none;
@@ -320,11 +322,11 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       font-weight: 800;
       font-size: 12px;
       cursor:pointer;
-      color:#F4F2ED;
+      color:#111827;
       background: transparent;
     }
     .pill-toggle button.active{
-      background: rgba(0,191,255,.18);
+      background: rgba(59,130,246,.18);
     }
 
     /* Task table */
@@ -332,35 +334,35 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       width:100%;
       overflow:auto;
       border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(15,23,42,.10);
+      background: #ffffff;
     }
-.rum-planner-page table{
+    .rum-planner-page table{
       width: 1700px;
       border-collapse: collapse;
       font-size: 12px;
-      color: #F4F2ED;
+      color: #111827;
     }
     thead th{
       position: sticky;
       top:0;
-      background: rgba(10,12,18,.85);
-      border-bottom: 1px solid rgba(255,255,255,.15);
+      background: #f8fafc;
+      border-bottom: 1px solid rgba(15,23,42,.12);
       padding: 10px 10px;
       text-align:left;
       white-space:nowrap;
       z-index:2;
     }
     tbody td{
-      border-bottom: 1px solid rgba(255,255,255,.10);
+      border-bottom: 1px solid rgba(15,23,42,.08);
       padding: 8px 10px;
       vertical-align: middle;
       white-space:nowrap;
     }
-    tbody tr:hover td{ background: rgba(255,255,255,.05); }
+    tbody tr:hover td{ background: rgba(15,23,42,.03); }
 
-    .sticky-col{ position: sticky; left:0; z-index:1; background: rgba(10,12,18,.88); }
-    .sticky-col-2{ position: sticky; left:110px; z-index:1; background: rgba(10,12,18,.88); }
+    .sticky-col{ position: sticky; left:0; z-index:1; background: #fff; }
+    .sticky-col-2{ position: sticky; left:110px; z-index:1; background: #fff; }
 
     .col-wbs{ width:110px; }
     .col-act{ width: 260px; }
@@ -410,16 +412,17 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
     }
 
     .ev-val{ font-weight: 900; }
-    .cv-neg{ color:#fecaca; font-weight:900; }
-    .cv-pos{ color:#bbf7d0; font-weight:900; }
+    .cv-neg{ color:#b91c1c; font-weight:900; }
+    .cv-pos{ color:#15803d; font-weight:900; }
 
     /* Charts */
     .chart-card{
-      background: rgba(255,255,255,.06);
-      border: 1px solid rgba(255,255,255,.14);
+      background: #ffffff;
+      border: 1px solid rgba(15,23,42,.10);
       border-radius: 16px;
       padding: 12px;
       overflow:hidden;
+      color:#111827;
     }
     .chart-card h3{
       margin:0 0 10px;
@@ -439,27 +442,29 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       font-weight:900;
       padding: 6px 10px;
       border-radius: 999px;
-      background: rgba(0,191,255,.14);
-      border: 1px solid rgba(0,191,255,.25);
-      color: rgba(244,242,237,.90);
+      background: rgba(59,130,246,.12);
+      border: 1px solid rgba(59,130,246,.20);
+      color: #1e3a8a;
     }
 
     /* Gantt */
     .gantt-wrap{
-      background: rgba(255,255,255,.06);
-      border: 1px solid rgba(255,255,255,.14);
+      background: #ffffff;
+      border: 1px solid rgba(15,23,42,.10);
       border-radius: 18px;
       overflow:hidden;
+      box-shadow: var(--shadow);
     }
     .gantt-head{
       padding: 12px 14px;
-      border-bottom: 1px solid rgba(255,255,255,.12);
+      border-bottom: 1px solid rgba(15,23,42,.08);
       display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;
-      background: rgba(255,255,255,.04);
+      background: #f8fafc;
+      color:#111827;
     }
     .gantt-head .meta{
       font-size: 12px;
-      color: rgba(244,242,237,.82);
+      color: #1f2937;
       font-weight: 700;
       display:flex; gap:10px; flex-wrap:wrap; align-items:center;
     }
@@ -472,13 +477,15 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       .gantt-grid{ grid-template-columns: 1fr; }
     }
     .gantt-left{
-      border-right: 1px solid rgba(255,255,255,.10);
+      border-right: 1px solid rgba(15,23,42,.08);
       padding: 10px;
+      background: #fff;
     }
     .gantt-right{
       position:relative;
       overflow:auto;
       padding: 10px;
+      background: #fff;
     }
     .gantt-timeline{
       display:grid;
@@ -488,41 +495,41 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       position:sticky;
       top:0;
       z-index:4;
-      background: rgba(10,12,18,.88);
-      border-bottom: 1px solid rgba(255,255,255,.10);
+      background: #f8fafc;
+      border-bottom: 1px solid rgba(15,23,42,.08);
     }
     .time-cell{
       text-align:center;
       font-weight: 900;
       font-size: 11px;
       padding: 8px 0;
-      border-right: 1px solid rgba(255,255,255,.08);
-      color: rgba(244,242,237,.85);
+      border-right: 1px solid rgba(15,23,42,.08);
+      color: #111827;
       user-select:none;
     }
     .track{
       display:grid;
       grid-auto-flow: column;
       grid-auto-columns: minmax(40px, 1fr);
-      border-bottom: 1px solid rgba(255,255,255,.08);
+      border-bottom: 1px solid rgba(15,23,42,.06);
       position:relative;
       height: 34px;
     }
-    .track:hover{ background: rgba(255,255,255,.04); }
+    .track:hover{ background: rgba(15,23,42,.03); }
     .bar{
       position:absolute;
       height: 18px;
       top: 8px;
       border-radius: 999px;
-      background: rgba(246,168,104,.75);
-      border: 1px solid rgba(246,168,104,.45);
-      box-shadow: 0 8px 18px rgba(0,0,0,.22);
+      background: rgba(37,99,235,.75);
+      border: 1px solid rgba(37,99,235,.45);
+      box-shadow: 0 8px 18px rgba(15,23,42,.15);
       cursor: grab;
     }
     .bar:active{ cursor: grabbing; }
     .bar.baseline{
-      background: rgba(0,191,255,.20);
-      border: 1px dashed rgba(0,191,255,.40);
+      background: rgba(59,130,246,.18);
+      border: 1px dashed rgba(59,130,246,.45);
       box-shadow: none;
       height: 10px;
       top: 20px;
@@ -550,11 +557,40 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
     .drawer{
       width: min(520px, 95vw);
       height: 100%;
-      background: rgba(10,12,18,.92);
-      border-left: 1px solid rgba(255,255,255,.14);
-      box-shadow: -14px 0 60px rgba(0,0,0,.50);
+      background: #ffffff;
+      border-left: 1px solid rgba(15,23,42,.10);
+      box-shadow: -14px 0 60px rgba(15,23,42,.18);
       padding: 16px;
       overflow:auto;
+      color:#111827;
+    }
+    .drawer-header{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(15,23,42,.08);
+      margin-bottom: 12px;
+    }
+    .drawer-title{
+      font-family: "Baloo 2";
+      font-size: 18px;
+      margin:0;
+    }
+    .drawer-sub{
+      font-size: 12px;
+      color: #4b5563;
+      margin-top: 4px;
+    }
+    .drawer-body{ margin-bottom: 12px; }
+    .drawer-footer{
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      gap:10px;
+      border-top: 1px solid rgba(15,23,42,.08);
+      padding-top: 12px;
     }
     .drawer h3{
       margin: 0 0 8px;
@@ -563,7 +599,7 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
     }
     .drawer .sub{
       margin: 0 0 14px;
-      color: rgba(244,242,237,.78);
+      color: #4b5563;
       font-size: 12px;
       line-height:1.35;
     }
@@ -579,7 +615,14 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       display:block;
       font-size: 11px;
       font-weight: 900;
-      color: rgba(244,242,237,.86);
+      color: #1f2937;
+      margin-bottom: 6px;
+    }
+    .field span{
+      display:block;
+      font-size: 11px;
+      font-weight: 900;
+      color: #1f2937;
       margin-bottom: 6px;
     }
     .field input, .field select, .field textarea{
@@ -607,11 +650,11 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
 
     /* Small hints */
     .hint{
-      background: rgba(255,255,255,.08);
-      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(15,23,42,.03);
+      border: 1px solid rgba(15,23,42,.10);
       border-radius: 14px;
       padding: 10px 12px;
-      color: rgba(244,242,237,.85);
+      color: #374151;
       font-size: 12px;
       line-height:1.35;
     }
@@ -633,12 +676,9 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
 .rum-planner-page canvas{ display:block; }
 .rum-planner-page .grid{
   display:grid;
-  grid-template-columns: 1.2fr .8fr;
+  grid-template-columns: 1fr;
   gap: 14px;
   align-items:start;
-}
-@media (max-width: 1180px){
-  .rum-planner-page .grid{ grid-template-columns: 1fr; }
 }
 .rum-planner-page .row{
   display:flex;
@@ -661,7 +701,7 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
   .rum-planner-page .gantt-body{ grid-template-columns: 1fr; }
   .rum-planner-page .gantt-left{
     border-right:none;
-    border-bottom: 1px solid rgba(255,255,255,.10);
+    border-bottom: 1px solid rgba(15,23,42,.10);
   }
 }
 .rum-planner-page .gantt-left,
@@ -677,7 +717,19 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
   .rum-planner-wrap{ padding: 0 12px; }
 }
 /* Evita que algún CSS externo fuerce blancos raros */
-.rum-planner-page .card{ background: rgba(10,12,18,.65); border:1px solid rgba(255,255,255,.10); }
+.rum-planner-page .card{ background: #ffffff; border:1px solid rgba(15,23,42,.10); color:#111827; }
+.rum-planner-page .muted{ color: #6b7280; }
+.rum-planner-page h1,
+.rum-planner-page h2,
+.rum-planner-page h3,
+.rum-planner-page h4,
+.rum-planner-page h5{ color:#111827; }
+.rum-planner-page table thead th{ color:#111827; }
+.rum-planner-page table tbody td{ color:#111827; }
+.rum-planner-page .panel-header p{ color: #4b5563; }
+.rum-planner-page .gantt-head strong{ color:#111827; }
+.rum-planner-page .table-wrap{ background:#ffffff; }
+.rum-planner-page #heatWrap{ background:#ffffff; border-color: rgba(15,23,42,.10); }
 
   </style>
 </head>
@@ -827,7 +879,7 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
           <div class="drawer-title">Nueva actividad</div>
           <div class="drawer-sub">Rellena lo esencial. Lo demás lo puedes completar después.</div>
         </div>
-        <button class="btn btn-ghost" id="btnCloseDrawer" type="button">Cerrar</button>
+        <button class="btn btn-ghost" id="btnCloseActivityDrawer" type="button">Cerrar</button>
       </div>
 
       <div class="drawer-body">
@@ -914,7 +966,7 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       </div>
 
       <div class="drawer-footer">
-        <button class="btn btn-ghost" id="btnCancelDrawer" type="button">Cancelar</button>
+        <button class="btn btn-ghost" id="btnCancelActivityDrawer" type="button">Cancelar</button>
         <button class="btn btn-primary" id="btnCreateActivity" type="button">Crear actividad</button>
       </div>
     </aside>
@@ -950,9 +1002,6 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       </div>
     </section>
 
-      </div>
-
-      <div>
         <section class="panel" style="margin-top:12px">
           <div class="panel-header">
             <div>
@@ -1933,25 +1982,77 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       refreshAll();
     });
 
+    const activityDrawer = document.getElementById('activityDrawer');
+    const resetActivityDrawer = () => {
+      document.getElementById('d_wbs').value = '';
+      document.getElementById('d_trade').value = 'Arquitectura';
+      document.getElementById('d_name').value = '';
+      document.getElementById('d_phase').value = 'Preconst';
+      document.getElementById('d_lean').value = 'LEAN-NONE';
+      document.getElementById('d_start').value = 1;
+      document.getElementById('d_dur').value = 1;
+      document.getElementById('d_pred').value = '';
+      document.getElementById('d_rel').value = 'FS';
+      document.getElementById('d_bac').value = 0;
+      document.getElementById('d_pct').value = 0;
+      document.getElementById('d_uid').value = '';
+    };
+    const openActivityDrawer = () => {
+      if (!activityDrawer) return;
+      activityDrawer.style.display = 'flex';
+      activityDrawer.setAttribute('aria-hidden', 'false');
+    };
+    const closeActivityDrawer = () => {
+      if (!activityDrawer) return;
+      activityDrawer.style.display = 'none';
+      activityDrawer.setAttribute('aria-hidden', 'true');
+    };
+
     document.getElementById('btnAdd')?.addEventListener('click', ()=>{
+      resetActivityDrawer();
+      openActivityDrawer();
+    });
+
+    document.getElementById('btnCloseActivityDrawer')?.addEventListener('click', closeActivityDrawer);
+    document.getElementById('btnCancelActivityDrawer')?.addEventListener('click', closeActivityDrawer);
+    activityDrawer?.addEventListener('click', (e)=>{
+      if (e.target === activityDrawer) closeActivityDrawer();
+    });
+
+    document.getElementById('btnCreateActivity')?.addEventListener('click', ()=>{
       const nextId = nextTaskId();
+      const wbs = document.getElementById('d_wbs').value.trim() || `X.${nextId}`;
+      const name = document.getElementById('d_name').value.trim() || 'Nueva actividad';
+      const trade = document.getElementById('d_trade').value.trim() || 'Arquitectura';
+      const phaseSelect = document.getElementById('d_phase');
+      const phase = phaseSelect?.selectedOptions?.[0]?.textContent?.trim() || 'Preconstrucción';
+      const lean = document.getElementById('d_lean').value;
+      const start = clamp(Number(document.getElementById('d_start').value || 1), 1, HORIZON_WEEKS);
+      const dur = clamp(Number(document.getElementById('d_dur').value || 1), 1, HORIZON_WEEKS);
+      const predValue = document.getElementById('d_pred').value.trim();
+      const rel = document.getElementById('d_rel').value.trim() || 'FS';
+      const cost = Math.max(0, Number(document.getElementById('d_bac').value || 0));
+      const percent = clamp(Number(document.getElementById('d_pct').value || 0), 0, 100);
+      const uidRaw = document.getElementById('d_uid').value.trim();
+      const uniqueIds = uidRaw ? uidRaw.split(',').map(s=>s.trim()).filter(Boolean) : [];
+
       state.tasks.push({
         id: nextId,
-        wbs: `X.${nextId}`,
-        name:'Nueva actividad',
-        trade:'Arquitectura',
-        phase:'Preconstrucción',
-        start:1,
-        dur:1,
-        pred:null,
-        rel:'FS',
-        cost:10000,
-        percent:0,
+        wbs,
+        name,
+        trade,
+        phase,
+        start,
+        dur,
+        pred: predValue || null,
+        rel,
+        cost,
+        percent,
         ac:0,
-        status:'Por liberar',
-        restr:0,
-        revitId:'',
-        revitUniqueIds:[],
+        status: lean === 'LEAN-READY' ? 'Listo' : 'Por liberar',
+        restr: lean === 'LEAN-CONSTRAINT' ? 1 : 0,
+        revitId: uniqueIds[0] || '',
+        revitUniqueIds: uniqueIds,
         constructionStatus:'',
         notes:'',
         baselineStart:null,
@@ -1959,6 +2060,7 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
         payapp:null
       });
       refreshAll();
+      closeActivityDrawer();
       toast('Actividad creada');
     });
 
