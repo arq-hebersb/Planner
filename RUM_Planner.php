@@ -617,11 +617,56 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
     }
   
 /* ====== NAV + LAYOUT SAFETY (para no romper tu navbar global) ====== */
-.rum-planner-page{ position:relative; z-index:1; }
+.rum-planner-page{
+  position:relative;
+  z-index:1;
+  width:100%;
+  min-height:100vh;
+  isolation:isolate;
+}
 .rum-planner-page *{ box-sizing:border-box; }
 .rum-planner-page a{ color:inherit; text-decoration:none; }
 .rum-planner-page button, .rum-planner-page input, .rum-planner-page select, .rum-planner-page textarea{
   font-family: inherit;
+}
+.rum-planner-page table{ border-collapse: collapse; }
+.rum-planner-page canvas{ display:block; }
+.rum-planner-page .grid{
+  display:grid;
+  grid-template-columns: 1.2fr .8fr;
+  gap: 14px;
+  align-items:start;
+}
+@media (max-width: 1180px){
+  .rum-planner-page .grid{ grid-template-columns: 1fr; }
+}
+.rum-planner-page .row{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:space-between;
+  margin:0;
+}
+.rum-planner-page .btn{ border-radius: 12px; }
+.rum-planner-page .panel{ overflow:hidden; }
+.rum-planner-page .gantt-grid{ display:grid; grid-template-columns: 1fr; }
+.rum-planner-page .gantt-timeline{ grid-column: 1 / -1; }
+.rum-planner-page .gantt-body{
+  display:grid;
+  grid-template-columns: 370px 1fr;
+  min-width:0;
+}
+@media (max-width: 1180px){
+  .rum-planner-page .gantt-body{ grid-template-columns: 1fr; }
+  .rum-planner-page .gantt-left{
+    border-right:none;
+    border-bottom: 1px solid rgba(255,255,255,.10);
+  }
+}
+.rum-planner-page .gantt-left,
+.rum-planner-page .gantt-right{
+  min-width:0;
 }
 .rum-planner-wrap{
   max-width: 1400px;
