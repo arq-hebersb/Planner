@@ -1,14 +1,18 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
+ini_set('display_errors', '0');
+ini_set('display_startup_errors', '0');
 error_reporting(E_ALL);
 // Log errors to a file in the same folder (ensure writable)
-ini_set('log_errors', 1);
+ini_set('log_errors', '1');
 ini_set('error_log', __DIR__ . '/rum_planner_error.log');
 
 // /public_html/RUM_Tools/Planner/rum_planner.php
-session_start();
-if (!isset($_SESSION['user_id'])) { header("Location: /login.php"); exit; }
+ob_start();
+if (session_status() !== PHP_SESSION_ACTIVE) {
+  session_start();
+}
+if (!isset($_SESSION['user_id'])) { header('Location: /login.php'); exit; }
+header('Content-Type: text/html; charset=UTF-8');
 
 $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
 ?><!doctype html>
@@ -636,7 +640,13 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
 <?php
   // Navbar (usa tu navbar del sitio si existe)
   $nav = $_SERVER['DOCUMENT_ROOT'] . '/navbar.php';
-  if (file_exists($nav)) { include_once $nav; }
+  if (is_readable($nav)) {
+    try {
+      include_once $nav;
+    } catch (Throwable $e) {
+      error_log('Navbar include failed: ' . $e->getMessage());
+    }
+  }
 ?>
 
 <div class="rum-planner-page">
