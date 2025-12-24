@@ -432,8 +432,30 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
     }
     .chart-grid{
       display:grid;
-      grid-template-columns: 1fr;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
       gap: 12px;
+    }
+    .error-list{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .error-item{
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(220,38,38,.25);
+      background: rgba(254,226,226,.6);
+      color: #7f1d1d;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .chart-card canvas{
+      width:100% !important;
+      height: 220px !important;
+    }
+    .chart-card canvas.chart-donut{
+      height: 200px !important;
     }
 
     .badge-bim{
@@ -501,11 +523,12 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
     .time-cell{
       text-align:center;
       font-weight: 900;
-      font-size: 11px;
-      padding: 8px 0;
+      font-size: 10px;
+      padding: 6px 0;
       border-right: 1px solid rgba(15,23,42,.08);
       color: #111827;
       user-select:none;
+      letter-spacing:.2px;
     }
     .track{
       display:grid;
@@ -829,8 +852,8 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
               <th class="col-act sticky-col-2">Actividad</th>
               <th class="col-trade">Trade</th>
               <th class="col-phase">Fase</th>
-              <th class="col-start">Inicio</th>
-              <th class="col-dur">Dur.</th>
+              <th class="col-start">Inicio (día)</th>
+              <th class="col-dur">Dur. (días)</th>
               <th class="col-pred">Pred.</th>
               <th class="col-rel">Rel.</th>
               <th class="col-cost">Costo (BAC)</th>
@@ -926,11 +949,11 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
           </label>
 
           <label class="field">
-            <span>Inicio (semana)</span>
+            <span>Inicio (día)</span>
             <input id="d_start" type="number" min="1" value="1" />
           </label>
           <label class="field">
-            <span>Duración (semanas)</span>
+            <span>Duración (días)</span>
             <input id="d_dur" type="number" min="1" value="1" />
           </label>
 
@@ -977,15 +1000,15 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       <div class="gantt-head">
         <div class="meta">
           <strong style="color:#111827">Gantt interactivo</strong>
-          · Horizonte <span id="weeksLabel"></span> semanas
+          · Horizonte <span id="weeksLabel"></span> días
           · <span class="badge-bim">Hook BIM: Exporta JSON</span>
         </div>
         <div class="actions">
           <button class="btn btn-mini" id="btnZoomIn">Zoom +</button>
           <button class="btn btn-mini" id="btnZoomOut">Zoom -</button>
           <button class="btn btn-mini" id="btnFit">Fit</button>
-          <button class="btn btn-mini" id="btnCellPlus">Semana +</button>
-          <button class="btn btn-mini" id="btnCellMinus">Semana -</button>
+          <button class="btn btn-mini" id="btnCellPlus">Día +</button>
+          <button class="btn btn-mini" id="btnCellMinus">Día -</button>
         </div>
       </div>
 
@@ -1016,6 +1039,10 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
           </div>
 
           <div class="panel-body">
+            <div class="error-list">
+              <div class="error-item" id="errorCost">Error 01: —</div>
+              <div class="error-item" id="errorWbs">Error 02: —</div>
+            </div>
             <div class="cards">
               <div class="card">
                 <div class="k">BAC Total</div>
@@ -1037,16 +1064,31 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
             <div class="chart-grid" style="margin-top:12px">
               <div class="chart-card">
                 <h3>S-Curve (PV / EV / AC)</h3>
-                <canvas id="chartSCurve" height="180"></canvas>
+                <canvas id="chartSCurve" class="chart-canvas" height="180"></canvas>
               </div>
 
               <div class="chart-card">
                 <h3>Distribución por trade</h3>
-                <canvas id="chartDonut" height="140"></canvas>
+                <canvas id="chartDonut" class="chart-donut" height="140"></canvas>
               </div>
 
               <div class="chart-card">
-                <h3>Heatmap Lean (restricciones por semana)</h3>
+                <h3>Costo por fase (BAC)</h3>
+                <canvas id="chartPhaseCost" class="chart-canvas" height="180"></canvas>
+              </div>
+
+              <div class="chart-card">
+                <h3>Estado de actividades</h3>
+                <canvas id="chartStatus" class="chart-donut" height="160"></canvas>
+              </div>
+
+              <div class="chart-card">
+                <h3>Cashflow diario (PV / AC)</h3>
+                <canvas id="chartDaily" class="chart-canvas" height="180"></canvas>
+              </div>
+
+              <div class="chart-card">
+                <h3>Heatmap Lean (restricciones por día)</h3>
                 <div id="heatWrap" style="overflow:auto;border-radius:14px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06)">
                   <canvas id="heatCanvas" width="900" height="220" style="display:block"></canvas>
                 </div>
@@ -1131,11 +1173,11 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
         </div>
 
         <div class="field">
-          <label>Inicio (semana)</label>
+          <label>Inicio (día)</label>
           <input id="dStart" type="number" min="1" />
         </div>
         <div class="field">
-          <label>Duración (semanas)</label>
+          <label>Duración (días)</label>
           <input id="dDur" type="number" min="1" />
         </div>
 
@@ -1219,20 +1261,22 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
        =========================== */
 
     const STORAGE_KEY = 'RUM_PLANNER_V1';
+    const DAYS_PER_WEEK = 7;
 
-    let HORIZON_WEEKS = 16;
-    let CELL_WIDTH = 44;
+    const BASE_CELL_WIDTH = 26;
+    let HORIZON_DAYS = 70;
+    let CELL_WIDTH = BASE_CELL_WIDTH;
     let ZOOM = 1.0;
 
     const state = {
       mode: 'normal',
       tasks: [
-        { id:1, wbs:'A.01', name:'Trazo y replanteo', trade:'Arquitectura', phase:'Preconstrucción', start:1, dur:1, pred:null, rel:'FS', cost: 35000, ac:0, percent:0, status:'Por liberar', restr:0, revitId:'', revitUniqueIds:[], constructionStatus:'', notes:'', baselineStart:null, baselineDur:null, payapp:null },
-        { id:2, wbs:'A.02', name:'Excavación', trade:'Estructuras', phase:'Cimentación', start:2, dur:2, pred:'A.01', rel:'FS', cost: 180000, ac:0, percent:0, status:'Por liberar', restr:1, revitId:'', revitUniqueIds:[], constructionStatus:'', notes:'', baselineStart:null, baselineDur:null, payapp:null },
-        { id:3, wbs:'A.03', name:'Cimentación', trade:'Estructuras', phase:'Cimentación', start:4, dur:3, pred:'A.02', rel:'FS', cost: 420000, ac:0, percent:0, status:'Por liberar', restr:0, revitId:'', revitUniqueIds:[], constructionStatus:'', notes:'', baselineStart:null, baselineDur:null, payapp:null },
-        { id:4, wbs:'A.04', name:'Estructura', trade:'Estructuras', phase:'Estructura', start:7, dur:4, pred:'A.03', rel:'FS', cost: 950000, ac:0, percent:0, status:'Por liberar', restr:0, revitId:'', revitUniqueIds:[], constructionStatus:'', notes:'', baselineStart:null, baselineDur:null, payapp:null },
-        { id:5, wbs:'A.05', name:'MEP rough-in', trade:'HVAC', phase:'MEP', start:9, dur:3, pred:'A.04', rel:'SS', cost: 520000, ac:0, percent:0, status:'Por liberar', restr:0, revitId:'', revitUniqueIds:[], constructionStatus:'', notes:'', baselineStart:null, baselineDur:null, payapp:null },
-        { id:6, wbs:'A.06', name:'Acabados base', trade:'Interiores', phase:'Acabados', start:12, dur:3, pred:'A.05', rel:'FS', cost: 680000, ac:0, percent:0, status:'Por liberar', restr:1, revitId:'', revitUniqueIds:[], constructionStatus:'', notes:'', baselineStart:null, baselineDur:null, payapp:null },
+        { id:1, wbs:'A.01', name:'Trazo y replanteo', trade:'Arquitectura', phase:'Preconstrucción', start:1, dur:5, pred:null, rel:'FS', cost: 35000, ac:0, percent:0, status:'Por liberar', restr:0, revitId:'', revitUniqueIds:[], constructionStatus:'', notes:'', baselineStart:null, baselineDur:null, payapp:null },
+        { id:2, wbs:'A.02', name:'Excavación', trade:'Estructuras', phase:'Cimentación', start:6, dur:10, pred:'A.01', rel:'FS', cost: 180000, ac:0, percent:0, status:'Por liberar', restr:1, revitId:'', revitUniqueIds:[], constructionStatus:'', notes:'', baselineStart:null, baselineDur:null, payapp:null },
+        { id:3, wbs:'A.03', name:'Cimentación', trade:'Estructuras', phase:'Cimentación', start:16, dur:12, pred:'A.02', rel:'FS', cost: 420000, ac:0, percent:0, status:'Por liberar', restr:0, revitId:'', revitUniqueIds:[], constructionStatus:'', notes:'', baselineStart:null, baselineDur:null, payapp:null },
+        { id:4, wbs:'A.04', name:'Estructura', trade:'Estructuras', phase:'Estructura', start:28, dur:15, pred:'A.03', rel:'FS', cost: 950000, ac:0, percent:0, status:'Por liberar', restr:0, revitId:'', revitUniqueIds:[], constructionStatus:'', notes:'', baselineStart:null, baselineDur:null, payapp:null },
+        { id:5, wbs:'A.05', name:'MEP rough-in', trade:'HVAC', phase:'MEP', start:40, dur:10, pred:'A.04', rel:'SS', cost: 520000, ac:0, percent:0, status:'Por liberar', restr:0, revitId:'', revitUniqueIds:[], constructionStatus:'', notes:'', baselineStart:null, baselineDur:null, payapp:null },
+        { id:6, wbs:'A.06', name:'Acabados base', trade:'Interiores', phase:'Acabados', start:50, dur:12, pred:'A.05', rel:'FS', cost: 680000, ac:0, percent:0, status:'Por liberar', restr:1, revitId:'', revitUniqueIds:[], constructionStatus:'', notes:'', baselineStart:null, baselineDur:null, payapp:null },
       ],
       milestones: [
         { id:1, name:'Hito 1: Cimentación OK', week:6, value: 250000 },
@@ -1253,6 +1297,40 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       return String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
     }
     function clamp(n,min,max){ return Math.max(min, Math.min(max,n)); }
+
+    function normalizeTaskUnits(task, fromWeeks){
+      if (!fromWeeks) return task;
+      const start = Number(task.start||1) * DAYS_PER_WEEK;
+      const dur = Math.max(1, Number(task.dur||1)) * DAYS_PER_WEEK;
+      const baselineStart = task.baselineStart ? Number(task.baselineStart) * DAYS_PER_WEEK : task.baselineStart;
+      const baselineDur = task.baselineDur ? Math.max(1, Number(task.baselineDur||1)) * DAYS_PER_WEEK : task.baselineDur;
+      return { ...task, start, dur, baselineStart, baselineDur };
+    }
+
+    function applyLoadedData(obj){
+      if (obj.mode) state.mode = obj.mode;
+      let fromWeeks = false;
+      if (Number.isFinite(obj.horizon_days)){
+        HORIZON_DAYS = Number(obj.horizon_days);
+      } else if (Number.isFinite(obj.horizonDays)){
+        HORIZON_DAYS = Number(obj.horizonDays);
+      } else if (Number.isFinite(obj.horizonWeeks)){
+        HORIZON_DAYS = Number(obj.horizonWeeks) * DAYS_PER_WEEK;
+        fromWeeks = true;
+      }
+      if (Array.isArray(obj.tasks)){
+        state.tasks = obj.tasks.map(t => normalizeTaskUnits(t, fromWeeks));
+      }
+      if (Array.isArray(obj.milestones)){
+        state.milestones = obj.milestones.map(m=>{
+          if (fromWeeks && Number.isFinite(m.week)){
+            return { ...m, day: Number(m.week) * DAYS_PER_WEEK };
+          }
+          return m;
+        });
+      }
+      state.procurement = Array.isArray(obj.procurement) ? obj.procurement : state.procurement;
+    }
 
     function toast(msg, bad=false){
       const el = document.getElementById('toast');
@@ -1402,8 +1480,8 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
               if (!Number.isFinite(v)) v = 0;
             }
 
-            if (key==='start') t.start = clamp(v,1,HORIZON_WEEKS);
-            else if (key==='dur') t.dur = clamp(v,1,HORIZON_WEEKS);
+            if (key==='start') t.start = clamp(v,1,HORIZON_DAYS);
+            else if (key==='dur') t.dur = clamp(v,1,HORIZON_DAYS);
             else if (key==='percent') t.percent = clamp(v,0,100);
             else if (key==='cost') t.cost = Math.max(0,v);
             else if (key==='ac') t.ac = Math.max(0,v);
@@ -1509,8 +1587,8 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       t.name = String(document.getElementById('dName').value||'').trim();
       t.trade = document.getElementById('dTrade').value;
       t.phase = document.getElementById('dPhase').value;
-      t.start = clamp(Number(document.getElementById('dStart').value||1),1,HORIZON_WEEKS);
-      t.dur = clamp(Number(document.getElementById('dDur').value||1),1,HORIZON_WEEKS);
+      t.start = clamp(Number(document.getElementById('dStart').value||1),1,HORIZON_DAYS);
+      t.dur = clamp(Number(document.getElementById('dDur').value||1),1,HORIZON_DAYS);
       t.pred = (String(document.getElementById('dPred').value||'').trim() || null);
       t.rel = document.getElementById('dRel').value;
       t.cost = Math.max(0, Number(document.getElementById('dCost').value||0));
@@ -1544,13 +1622,13 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       const tl = document.getElementById('timeline');
       tl.style.gridAutoColumns = `${CELL_WIDTH}px`;
       tl.innerHTML = '';
-      for (let w=1; w<=HORIZON_WEEKS; w++){
-        const d = document.createElement('div');
-        d.className = 'time-cell';
-        d.textContent = `W${w}`;
-        tl.appendChild(d);
+      for (let day=1; day<=HORIZON_DAYS; day++){
+        const cell = document.createElement('div');
+        cell.className = 'time-cell';
+        cell.textContent = `D${day}`;
+        tl.appendChild(cell);
       }
-      document.getElementById('weeksLabel').textContent = HORIZON_WEEKS;
+      document.getElementById('weeksLabel').textContent = HORIZON_DAYS;
     }
 
     function renderGantt(){
@@ -1566,8 +1644,8 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
         row.style.flexDirection='column';
         row.style.gap='2px';
         row.style.padding='6px 6px';
-        row.style.borderBottom='1px solid rgba(255,255,255,.08)';
-        row.innerHTML = `<div style="font-weight:900">${escapeHtml(t.wbs)}</div><div style="opacity:.8;font-size:11px">${escapeHtml(t.name)}</div>`;
+        row.style.borderBottom='1px solid rgba(15,23,42,.08)';
+        row.innerHTML = `<div style="font-weight:900">${escapeHtml(t.wbs)}</div><div style="opacity:.75;font-size:11px">${escapeHtml(t.name)}</div>`;
         left.appendChild(row);
 
         const track = document.createElement('div');
@@ -1593,7 +1671,7 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
         const w0 = Number(t.dur||1) * CELL_WIDTH;
         bar.style.left = `${x0}px`;
         bar.style.width = `${w0}px`;
-        bar.title = `${t.wbs} | ${t.name} (W${t.start} +${t.dur})`;
+        bar.title = `${t.wbs} | ${t.name} (D${t.start} +${t.dur})`;
         track.appendChild(bar);
 
         // drag logic
@@ -1610,8 +1688,8 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
         window.addEventListener('mousemove', (e)=>{
           if (!dragging) return;
           const dx = e.clientX - dragStartX;
-          const deltaWeeks = Math.round(dx / CELL_WIDTH);
-          t.start = clamp(origStart + deltaWeeks, 1, HORIZON_WEEKS);
+          const deltaDays = Math.round(dx / CELL_WIDTH);
+          t.start = clamp(origStart + deltaDays, 1, HORIZON_DAYS);
           renderTable();
           renderGantt();
           refreshKpisCharts();
@@ -1625,12 +1703,12 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
         tracks.appendChild(track);
       });
 
-      // today line (optional: semana actual basada en hoy -> 1)
-      const todayWeek = 1;
+      // today line (optional: día actual basado en hoy -> 1)
+      const todayDay = 1;
       const line = document.getElementById('todayLine');
-      if (todayWeek >=1 && todayWeek <= HORIZON_WEEKS){
+      if (todayDay >=1 && todayDay <= HORIZON_DAYS){
         line.style.display='block';
-        line.style.left = `${(todayWeek-1)*CELL_WIDTH}px`;
+        line.style.left = `${(todayDay-1)*CELL_WIDTH}px`;
         line.style.height = `${Math.max(360, list.length*34)}px`;
       }else{
         line.style.display='none';
@@ -1642,25 +1720,28 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
 
     let chartSCurve = null;
     let chartDonut = null;
+    let chartPhaseCost = null;
+    let chartStatus = null;
+    let chartDaily = null;
     let chartIssues = null;
 
     function seriesPV(){
-      // PV simple: distribuir BAC linealmente por duración dentro del horizonte
-      const pv = Array.from({length:HORIZON_WEEKS},()=>0);
+      // PV simple: distribuir BAC linealmente por duración dentro del horizonte (días)
+      const pv = Array.from({length:HORIZON_DAYS},()=>0);
       state.tasks.forEach(t=>{
         const bac = Number(t.cost||0);
         if (bac<=0) return;
         const dur = Math.max(1, Number(t.dur||1));
         const per = bac/dur;
         for (let i=0;i<dur;i++){
-          const w = (Number(t.start||1)-1)+i;
-          if (w>=0 && w<pv.length) pv[w]+=per;
+          const d = (Number(t.start||1)-1)+i;
+          if (d>=0 && d<pv.length) pv[d]+=per;
         }
       });
       return pv;
     }
     function seriesEV(){
-      const ev = Array.from({length:HORIZON_WEEKS},()=>0);
+      const ev = Array.from({length:HORIZON_DAYS},()=>0);
       state.tasks.forEach(t=>{
         const bac = Number(t.cost||0);
         const dur = Math.max(1, Number(t.dur||1));
@@ -1668,20 +1749,20 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
         const earned = bac*pct;
         const per = earned/dur;
         for (let i=0;i<dur;i++){
-          const w = (Number(t.start||1)-1)+i;
-          if (w>=0 && w<ev.length) ev[w]+=per;
+          const d = (Number(t.start||1)-1)+i;
+          if (d>=0 && d<ev.length) ev[d]+=per;
         }
       });
       return ev;
     }
     function seriesAC(){
-      // AC se suma en la semana de fin planificada (simplificado)
-      const ac = Array.from({length:HORIZON_WEEKS},()=>0);
+      // AC se suma en el día de fin planificado (simplificado)
+      const ac = Array.from({length:HORIZON_DAYS},()=>0);
       state.tasks.forEach(t=>{
         const v = Number(t.ac||0);
         if (v<=0) return;
-        const endW = clamp((Number(t.start||1)+Number(t.dur||1)-1),1,HORIZON_WEEKS);
-        ac[endW-1]+=v;
+        const endDay = clamp((Number(t.start||1)+Number(t.dur||1)-1),1,HORIZON_DAYS);
+        ac[endDay-1]+=v;
       });
       return ac;
     }
@@ -1700,6 +1781,11 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       document.getElementById('kpiBAC').textContent = money(bacTotal);
       document.getElementById('kpiEV').textContent = money(evTotal);
       document.getElementById('kpiAC').textContent = money(acTotal);
+
+      const missingCost = state.tasks.filter(t=>Number(t.cost||0) <= 0).length;
+      const missingWbs = state.tasks.filter(t=>!String(t.wbs||'').trim()).length;
+      document.getElementById('errorCost').textContent = `Error 01: ${missingCost} actividades sin BAC`;
+      document.getElementById('errorWbs').textContent = `Error 02: ${missingWbs} actividades sin WBS`;
 
       const PV = seriesPV();
       const EV = seriesEV();
@@ -1729,7 +1815,7 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       document.getElementById('svChip').textContent = `SV: ${SV? money(SV) : '—'}`;
 
       // S-curve chart
-      const labels = Array.from({length:HORIZON_WEEKS},(_,i)=>`W${i+1}`);
+      const labels = Array.from({length:HORIZON_DAYS},(_,i)=>`D${i+1}`);
       const ctx1 = document.getElementById('chartSCurve').getContext('2d');
 
       if (chartSCurve) chartSCurve.destroy();
@@ -1738,15 +1824,19 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
         data: {
           labels,
           datasets: [
-            { label:'PV', data: PVc, tension:0.25 },
-            { label:'EV', data: EVc, tension:0.25 },
-            { label:'AC', data: ACc, tension:0.25 },
+            { label:'PV', data: PVc, tension:0.25, pointRadius:0, borderColor:'rgba(37,99,235,.9)' },
+            { label:'EV', data: EVc, tension:0.25, pointRadius:0, borderColor:'rgba(16,185,129,.9)' },
+            { label:'AC', data: ACc, tension:0.25, pointRadius:0, borderColor:'rgba(249,115,22,.9)' },
           ]
         },
         options: {
           responsive:true,
+          maintainAspectRatio:false,
           plugins:{ legend:{ labels:{ boxWidth:10, boxHeight:10 } } },
-          scales:{ x:{ ticks:{ maxRotation:0 } }, y:{ beginAtZero:true } }
+          scales:{
+            x:{ ticks:{ maxRotation:0, autoSkip:true, maxTicksLimit:12 } },
+            y:{ beginAtZero:true, suggestedMax: Math.max(...PVc, ...EVc, ...ACc) * 1.15 || 1 }
+          }
         }
       });
 
@@ -1766,8 +1856,80 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
         },
         options:{
           responsive:true,
+          maintainAspectRatio:false,
           cutout:'70%',
           plugins:{ legend:{ position:'bottom' } }
+        }
+      });
+
+      // Cost by phase (bar)
+      const byPhase = {};
+      state.tasks.forEach(t=>{
+        const ph = t.phase || 'Sin fase';
+        byPhase[ph] = (byPhase[ph]||0) + Number(t.cost||0);
+      });
+      const phaseLabels = Object.keys(byPhase);
+      const phaseData = Object.values(byPhase);
+      const ctxPhase = document.getElementById('chartPhaseCost').getContext('2d');
+      if (chartPhaseCost) chartPhaseCost.destroy();
+      chartPhaseCost = new Chart(ctxPhase, {
+        type:'bar',
+        data:{ labels: phaseLabels, datasets:[{ label:'BAC', data: phaseData, backgroundColor:'rgba(37,99,235,.55)' }] },
+        options:{
+          responsive:true,
+          maintainAspectRatio:false,
+          plugins:{ legend:{ display:false } },
+          scales:{
+            x:{ ticks:{ autoSkip:false, maxRotation:45, minRotation:0 } },
+            y:{ beginAtZero:true, suggestedMax: Math.max(...phaseData, 1) * 1.2 }
+          }
+        }
+      });
+
+      // Status distribution
+      const byStatus = {};
+      state.tasks.forEach(t=>{
+        const status = t.status || 'Por liberar';
+        byStatus[status] = (byStatus[status]||0) + 1;
+      });
+      const ctxStatus = document.getElementById('chartStatus').getContext('2d');
+      if (chartStatus) chartStatus.destroy();
+      chartStatus = new Chart(ctxStatus, {
+        type:'doughnut',
+        data:{
+          labels: Object.keys(byStatus),
+          datasets:[{ data:Object.values(byStatus) }]
+        },
+        options:{
+          responsive:true,
+          maintainAspectRatio:false,
+          cutout:'65%',
+          plugins:{ legend:{ position:'bottom' } }
+        }
+      });
+
+      // Daily cashflow (PV vs AC)
+      const ctxDaily = document.getElementById('chartDaily').getContext('2d');
+      if (chartDaily) chartDaily.destroy();
+      const pvMax = Math.max(...PV, 0);
+      const acMax = Math.max(...AC, 0);
+      chartDaily = new Chart(ctxDaily, {
+        type:'line',
+        data:{
+          labels,
+          datasets:[
+            { label:'PV diario', data: PV, tension:0.25, pointRadius:0, borderColor:'rgba(37,99,235,.9)' },
+            { label:'AC diario', data: AC, tension:0.25, pointRadius:0, borderColor:'rgba(220,38,38,.85)' }
+          ]
+        },
+        options:{
+          responsive:true,
+          maintainAspectRatio:false,
+          plugins:{ legend:{ labels:{ boxWidth:10, boxHeight:10 } } },
+          scales:{
+            x:{ ticks:{ autoSkip:true, maxTicksLimit:12 } },
+            y:{ beginAtZero:true, suggestedMax: Math.max(pvMax, acMax) * 1.2 || 1 }
+          }
         }
       });
 
@@ -1782,7 +1944,12 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       chartIssues = new Chart(ctx3, {
         type:'bar',
         data:{ labels:Object.keys(issues), datasets:[{ label:'Actividades', data:Object.values(issues) }] },
-        options:{ responsive:true, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, precision:0 } } }
+        options:{
+          responsive:true,
+          maintainAspectRatio:false,
+          plugins:{ legend:{ display:false } },
+          scales:{ y:{ beginAtZero:true, precision:0, suggestedMax: Math.max(...Object.values(issues), 1) * 1.4 } }
+        }
       });
 
       renderHeatmap();
@@ -1800,8 +1967,8 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       const ctx = canvas.getContext('2d');
 
       const rows = filteredTasks();
-      const cols = HORIZON_WEEKS;
-      const cellW = 42;
+      const cols = HORIZON_DAYS;
+      const cellW = 24;
       const cellH = 22;
 
       const w = Math.max(900, cols*cellW + 10);
@@ -1813,12 +1980,12 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
 
       // header
       ctx.font = '700 11px Inter';
-      ctx.fillStyle = 'rgba(244,242,237,.86)';
-      ctx.fillText('WBS / Semana', 10, 16);
+      ctx.fillStyle = '#111827';
+      ctx.fillText('WBS / Día', 10, 16);
 
       for (let c=1;c<=cols;c++){
         const x = 110 + (c-1)*cellW;
-        ctx.fillText(`W${c}`, x+8, 16);
+        ctx.fillText(`D${c}`, x+6, 16);
       }
 
       // grid cells
@@ -1826,7 +1993,7 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
         const t = rows[r];
         const y = 30 + r*cellH;
 
-        ctx.fillStyle = 'rgba(244,242,237,.85)';
+        ctx.fillStyle = '#1f2937';
         ctx.fillText(String(t.wbs||''), 10, y+15);
 
         for (let c=1;c<=cols;c++){
@@ -1837,7 +2004,7 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
           if (inSpan && isConstraint) alpha = 0.30;
           else if (inSpan && !isConstraint) alpha = 0.16;
 
-          ctx.fillStyle = `rgba(0,191,255,${alpha})`;
+          ctx.fillStyle = `rgba(37,99,235,${alpha})`;
           if (inSpan && isConstraint) ctx.fillStyle = `rgba(220,38,38,${alpha})`;
           ctx.fillRect(x, y, cellW-2, cellH-2);
         }
@@ -1850,16 +2017,16 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
         ctx.clearRect(0,0,w,h);
         // re-render base
         ctx.font = '700 11px Inter';
-        ctx.fillStyle = 'rgba(244,242,237,.86)';
-        ctx.fillText('WBS / Semana', 10, 16);
+        ctx.fillStyle = '#111827';
+        ctx.fillText('WBS / Día', 10, 16);
         for (let c=1;c<=cols;c++){
           const x = 110 + (c-1)*cellW;
-          ctx.fillText(`W${c}`, x+8, 16);
+          ctx.fillText(`D${c}`, x+6, 16);
         }
         for (let r=0;r<rows.length;r++){
           const t = rows[r];
           const y = 30 + r*cellH;
-          ctx.fillStyle = 'rgba(244,242,237,.85)';
+          ctx.fillStyle = '#1f2937';
           ctx.fillText(String(t.wbs||''), 10, y+15);
 
           for (let c=1;c<=cols;c++){
@@ -1870,7 +2037,7 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
             if (inSpan && isConstraint) alpha = 0.30;
             else if (inSpan && !isConstraint) alpha = 0.16;
 
-            ctx.fillStyle = `rgba(0,191,255,${alpha})`;
+            ctx.fillStyle = `rgba(37,99,235,${alpha})`;
             if (inSpan && isConstraint) ctx.fillStyle = `rgba(220,38,38,${alpha})`;
             ctx.fillRect(x, y, cellW-2, cellH-2);
           }
@@ -1879,7 +2046,7 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
         if (hover.r>=0 && hover.c>=1){
           const x = 110 + (hover.c-1)*cellW;
           const y = 30 + hover.r*cellH;
-          ctx.strokeStyle = 'rgba(246,168,104,.95)';
+          ctx.strokeStyle = 'rgba(37,99,235,.85)';
           ctx.lineWidth = 2;
           ctx.strokeRect(x+1, y+1, cellW-4, cellH-4);
         }
@@ -1897,7 +2064,7 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
           hover.c = c; hover.r = r;
           const t = rows[r];
           const inSpan = (c >= t.start) && (c <= (t.start+t.dur-1));
-          hint.textContent = `WBS: ${t.wbs} · Semana: W${c} · ${(inSpan? 'En actividad':'Fuera')} · ${(t.restr===1? 'CON restricción':'sin restricción')}`;
+          hint.textContent = `WBS: ${t.wbs} · Día: D${c} · ${(inSpan? 'En actividad':'Fuera')} · ${(t.restr===1? 'CON restricción':'sin restricción')}`;
         }else{
           hover.c = -1; hover.r = -1;
           hint.textContent = 'Pasa el cursor por el heatmap para ver la celda.';
@@ -2027,8 +2194,8 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       const phaseSelect = document.getElementById('d_phase');
       const phase = phaseSelect?.selectedOptions?.[0]?.textContent?.trim() || 'Preconstrucción';
       const lean = document.getElementById('d_lean').value;
-      const start = clamp(Number(document.getElementById('d_start').value || 1), 1, HORIZON_WEEKS);
-      const dur = clamp(Number(document.getElementById('d_dur').value || 1), 1, HORIZON_WEEKS);
+      const start = clamp(Number(document.getElementById('d_start').value || 1), 1, HORIZON_DAYS);
+      const dur = clamp(Number(document.getElementById('d_dur').value || 1), 1, HORIZON_DAYS);
       const predValue = document.getElementById('d_pred').value.trim();
       const rel = document.getElementById('d_rel').value.trim() || 'FS';
       const cost = Math.max(0, Number(document.getElementById('d_bac').value || 0));
@@ -2075,7 +2242,8 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
 
     document.getElementById('btnSaveLocal')?.addEventListener('click', ()=>{
       const payload = {
-        horizonWeeks:HORIZON_WEEKS,
+        horizonDays:HORIZON_DAYS,
+        horizonWeeks: Math.ceil(HORIZON_DAYS / DAYS_PER_WEEK),
         mode:state.mode,
         tasks:state.tasks,
         milestones:state.milestones,
@@ -2091,10 +2259,7 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       try{
         const obj = JSON.parse(raw);
         state.mode = obj.mode || 'normal';
-        state.tasks = Array.isArray(obj.tasks) ? obj.tasks : state.tasks;
-        state.milestones = Array.isArray(obj.milestones) ? obj.milestones : state.milestones;
-        state.procurement = Array.isArray(obj.procurement) ? obj.procurement : state.procurement;
-        HORIZON_WEEKS = Number(obj.horizonWeeks || HORIZON_WEEKS);
+        applyLoadedData(obj);
 
         document.querySelectorAll('#leanToggle button').forEach(x=>{
           x.classList.toggle('active', x.dataset.mode===state.mode);
@@ -2251,7 +2416,8 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       const out = {
         schema: 'RUM_PLANNER_UPDATES_V1',
         generated_at: new Date().toISOString(),
-        horizon_weeks: HORIZON_WEEKS,
+        horizon_days: HORIZON_DAYS,
+        horizon_weeks: Math.ceil(HORIZON_DAYS / DAYS_PER_WEEK),
         tasks: []
       };
 
@@ -2292,7 +2458,8 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
 
     document.getElementById('btnExport')?.addEventListener('click', ()=>{
       const payload = {
-        horizonWeeks: HORIZON_WEEKS,
+        horizonDays: HORIZON_DAYS,
+        horizonWeeks: Math.ceil(HORIZON_DAYS / DAYS_PER_WEEK),
         mode: state.mode,
         tasks: state.tasks,
         milestones: state.milestones,
@@ -2313,10 +2480,7 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
           toast('Este JSON es de Updates (Revit). Importa un JSON de Planner para cargar datos.', true);
           return;
         }
-        if (obj.horizonWeeks) HORIZON_WEEKS = Number(obj.horizonWeeks||HORIZON_WEEKS);
-        if (Array.isArray(obj.tasks)) state.tasks = obj.tasks;
-        if (Array.isArray(obj.milestones)) state.milestones = obj.milestones;
-        if (Array.isArray(obj.procurement)) state.procurement = obj.procurement;
+        applyLoadedData(obj);
         refreshAll();
         toast('JSON importado');
       }catch(e){
@@ -2337,10 +2501,7 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       try{
         const raw = await file.text();
         const obj = JSON.parse(raw);
-        if (obj.horizonWeeks) HORIZON_WEEKS = Number(obj.horizonWeeks||HORIZON_WEEKS);
-        if (Array.isArray(obj.tasks)) state.tasks = obj.tasks;
-        if (Array.isArray(obj.milestones)) state.milestones = obj.milestones;
-        if (Array.isArray(obj.procurement)) state.procurement = obj.procurement;
+        applyLoadedData(obj);
         refreshAll();
         toast('JSON cargado desde archivo');
       }catch(e){
@@ -2353,26 +2514,26 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
        =========================== */
 
     document.getElementById('btnCellPlus')?.addEventListener('click', ()=>{
-      HORIZON_WEEKS = clamp(HORIZON_WEEKS+1, 4, 60);
+      HORIZON_DAYS = clamp(HORIZON_DAYS+1, 10, 180);
       refreshAll();
     });
     document.getElementById('btnCellMinus')?.addEventListener('click', ()=>{
-      HORIZON_WEEKS = clamp(HORIZON_WEEKS-1, 4, 60);
+      HORIZON_DAYS = clamp(HORIZON_DAYS-1, 10, 180);
       refreshAll();
     });
     document.getElementById('btnZoomIn')?.addEventListener('click', ()=>{
       ZOOM = clamp(ZOOM + 0.1, 0.7, 1.6);
-      CELL_WIDTH = Math.round(44 * ZOOM);
+      CELL_WIDTH = Math.round(BASE_CELL_WIDTH * ZOOM);
       refreshAll();
     });
     document.getElementById('btnZoomOut')?.addEventListener('click', ()=>{
       ZOOM = clamp(ZOOM - 0.1, 0.7, 1.6);
-      CELL_WIDTH = Math.round(44 * ZOOM);
+      CELL_WIDTH = Math.round(BASE_CELL_WIDTH * ZOOM);
       refreshAll();
     });
     document.getElementById('btnFit')?.addEventListener('click', ()=>{
       ZOOM = 1.0;
-      CELL_WIDTH = 44;
+      CELL_WIDTH = BASE_CELL_WIDTH;
       refreshAll();
     });
 
