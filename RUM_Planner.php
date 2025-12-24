@@ -108,8 +108,11 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       position:relative;
       max-width: 1500px;
       margin: 0 auto;
-      padding: 22px 18px 70px;
+      padding: 22px 18px 90px;
       z-index:2;
+      display:flex;
+      flex-direction:column;
+      gap:16px;
     }
 
     .nav-wrap{
@@ -423,6 +426,10 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       padding: 12px;
       overflow:hidden;
       color:#111827;
+      min-height: 260px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
     }
     .chart-card h3{
       margin:0 0 10px;
@@ -450,12 +457,48 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       font-size: 12px;
       font-weight: 700;
     }
+    .gantt-controls{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(15,23,42,.08);
+      background: #ffffff;
+    }
+    .gantt-controls .control{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      font-size:12px;
+      color:#374151;
+      font-weight:600;
+    }
+    .gantt-controls textarea{
+      min-height: 70px;
+    }
+    .gantt-controls .control-inline{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      align-items:flex-start;
+      justify-content:flex-end;
+    }
+    .gantt-controls .control-inline label{
+      font-size:12px;
+      font-weight:600;
+      color:#374151;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
     .chart-card canvas{
       width:100% !important;
       height: 220px !important;
+      max-height: 240px;
     }
     .chart-card canvas.chart-donut{
       height: 200px !important;
+      max-height: 220px;
     }
 
     .badge-bim{
@@ -775,7 +818,8 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
   <div class="satellite satellite-1"></div>
   <div class="satellite satellite-2"></div>
 
-<div class="nav-wrap">
+  <div class="rum-shell">
+    <div class="nav-wrap">
       <div class="nav-fallback">
         <div class="brand">
           <div class="logo">R</div>
@@ -1009,6 +1053,24 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
           <button class="btn btn-mini" id="btnFit">Fit</button>
           <button class="btn btn-mini" id="btnCellPlus">Día +</button>
           <button class="btn btn-mini" id="btnCellMinus">Día -</button>
+        </div>
+      </div>
+
+      <div class="gantt-controls">
+        <div class="control">
+          <label for="projectStartDate">Fecha de inicio</label>
+          <input type="date" id="projectStartDate" />
+        </div>
+        <div class="control">
+          <label for="nonWorkingDays">Días no laborables (YYYY-MM-DD)</label>
+          <textarea id="nonWorkingDays" placeholder="2025-01-01&#10;2025-02-05"></textarea>
+        </div>
+        <div class="control-inline">
+          <label>
+            <input type="checkbox" id="weekendsOff" checked />
+            Sábado y domingo no laborables
+          </label>
+          <button class="btn btn-mini" id="btnApplyStartDate">Calcular fechas</button>
         </div>
       </div>
 
@@ -1297,6 +1359,149 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       return String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
     }
     function clamp(n,min,max){ return Math.max(min, Math.min(max,n)); }
+
+    function formatDateISO(date){
+      const y = date.getFullYear();
+      const m = String(date.getMonth()+1).padStart(2,'0');
+      const d = String(date.getDate()).padStart(2,'0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function mexicoHolidays(year){
+      return [
+        `${year}-01-01`,
+        `${year}-02-05`,
+        `${year}-03-21`,
+        `${year}-05-01`,
+        `${year}-09-16`,
+        `${year}-11-18`,
+        `${year}-12-25`,
+      ];
+    }
+
+    function parseNonWorkingDates(){
+      const raw = String(document.getElementById('nonWorkingDays')?.value || '');
+      const parts = raw.split(/[\n,]+/).map(s=>s.trim()).filter(Boolean);
+      return new Set(parts);
+    }
+
+    function isNonWorking(date, nonWorkingSet, weekendsOff){
+      const day = date.getDay();
+      const iso = formatDateISO(date);
+      if (nonWorkingSet.has(iso)) return true;
+      if (weekendsOff && (day === 0 || day === 6)) return true;
+      return false;
+    }
+
+    function nextWorkingDate(date, nonWorkingSet, weekendsOff){
+      const d = new Date(date);
+      while (isNonWorking(d, nonWorkingSet, weekendsOff)){
+        d.setDate(d.getDate() + 1);
+      }
+      return d;
+    }
+
+    function addWorkingDays(startDate, workDays, nonWorkingSet, weekendsOff){
+      let current = new Date(startDate);
+      let count = 0;
+      while (count < workDays){
+        if (!isNonWorking(current, nonWorkingSet, weekendsOff)){
+          count += 1;
+          if (count === workDays) break;
+        }
+        current.setDate(current.getDate() + 1);
+      }
+      return current;
+    }
+
+    function daysBetween(startDate, endDate){
+      const ms = 24 * 60 * 60 * 1000;
+      const start = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+      const end = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
+      return Math.round((end - start) / ms);
+    }
+
+    function normalizeTaskUnits(task, fromWeeks){
+      if (!fromWeeks) return task;
+      const start = Number(task.start||1) * DAYS_PER_WEEK;
+      const dur = Math.max(1, Number(task.dur||1)) * DAYS_PER_WEEK;
+      const baselineStart = task.baselineStart ? Number(task.baselineStart) * DAYS_PER_WEEK : task.baselineStart;
+      const baselineDur = task.baselineDur ? Math.max(1, Number(task.baselineDur||1)) * DAYS_PER_WEEK : task.baselineDur;
+      return { ...task, start, dur, baselineStart, baselineDur };
+    }
+
+    function applyLoadedData(obj){
+      if (obj.mode) state.mode = obj.mode;
+      let fromWeeks = false;
+      if (Number.isFinite(obj.horizon_days)){
+        HORIZON_DAYS = Number(obj.horizon_days);
+      } else if (Number.isFinite(obj.horizonDays)){
+        HORIZON_DAYS = Number(obj.horizonDays);
+      } else if (Number.isFinite(obj.horizonWeeks)){
+        HORIZON_DAYS = Number(obj.horizonWeeks) * DAYS_PER_WEEK;
+        fromWeeks = true;
+      }
+      if (Array.isArray(obj.tasks)){
+        state.tasks = obj.tasks.map(t => normalizeTaskUnits(t, fromWeeks));
+      }
+      if (Array.isArray(obj.milestones)){
+        state.milestones = obj.milestones.map(m=>{
+          if (fromWeeks && Number.isFinite(m.week)){
+            return { ...m, day: Number(m.week) * DAYS_PER_WEEK };
+          }
+          return m;
+        });
+      }
+      state.procurement = Array.isArray(obj.procurement) ? obj.procurement : state.procurement;
+    }
+
+    function scheduleFromStartDate(){
+      const dateValue = document.getElementById('projectStartDate')?.value;
+      if (!dateValue) return toast('Selecciona una fecha de inicio', true);
+      const startDate = new Date(dateValue + 'T00:00:00');
+      const nonWorkingSet = parseNonWorkingDates();
+      const weekendsOff = document.getElementById('weekendsOff')?.checked ?? true;
+
+      const taskByWbs = new Map();
+      state.tasks.forEach(t=>taskByWbs.set(String(t.wbs||'').trim(), t));
+      const endDates = new Map();
+
+      const sorted = [...state.tasks].sort((a,b)=>Number(a.start||0) - Number(b.start||0));
+      sorted.forEach((t, index)=>{
+        let earliestDate = startDate;
+        const predKey = String(t.pred||'').trim();
+        if (predKey && taskByWbs.has(predKey)){
+          const predTask = taskByWbs.get(predKey);
+          const predEnd = endDates.get(predTask.id);
+          if (predEnd) {
+            earliestDate = new Date(predEnd);
+            earliestDate.setDate(earliestDate.getDate() + 1);
+          }
+        } else if (index > 0){
+          const prev = sorted[index - 1];
+          const prevEnd = endDates.get(prev.id);
+          if (prevEnd) {
+            earliestDate = new Date(prevEnd);
+            earliestDate.setDate(earliestDate.getDate() + 1);
+          }
+        }
+
+        const workStart = nextWorkingDate(earliestDate, nonWorkingSet, weekendsOff);
+        const workDays = Math.max(1, Number(t.dur||1));
+        const workEnd = addWorkingDays(workStart, workDays, nonWorkingSet, weekendsOff);
+        endDates.set(t.id, workEnd);
+
+        const startOffset = daysBetween(startDate, workStart) + 1;
+        const endOffset = daysBetween(startDate, workEnd) + 1;
+        t.start = Math.max(1, startOffset);
+        t.dur = Math.max(1, endOffset - startOffset + 1);
+      });
+
+      const maxEnd = Math.max(...Array.from(endDates.values()).map(d=>daysBetween(startDate, d) + 1), HORIZON_DAYS);
+      HORIZON_DAYS = clamp(maxEnd + 3, 10, 180);
+      refreshAll();
+      toast('Fechas recalculadas con días no laborables');
+    }
 
     function normalizeTaskUnits(task, fromWeeks){
       if (!fromWeeks) return task;
@@ -1787,6 +1992,11 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       document.getElementById('errorCost').textContent = `Error 01: ${missingCost} actividades sin BAC`;
       document.getElementById('errorWbs').textContent = `Error 02: ${missingWbs} actividades sin WBS`;
 
+      const missingCost = state.tasks.filter(t=>Number(t.cost||0) <= 0).length;
+      const missingWbs = state.tasks.filter(t=>!String(t.wbs||'').trim()).length;
+      document.getElementById('errorCost').textContent = `Error 01: ${missingCost} actividades sin BAC`;
+      document.getElementById('errorWbs').textContent = `Error 02: ${missingWbs} actividades sin WBS`;
+
       const PV = seriesPV();
       const EV = seriesEV();
       const AC = seriesAC();
@@ -1816,6 +2026,13 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
 
       // S-curve chart
       const labels = Array.from({length:HORIZON_DAYS},(_,i)=>`D${i+1}`);
+      const dayTick = (value, index) => {
+        const label = labels[index];
+        const day = Number(label?.replace('D',''));
+        if (!day) return '';
+        if (day === 1 || day === HORIZON_DAYS || day % 7 === 1) return label;
+        return '';
+      };
       const ctx1 = document.getElementById('chartSCurve').getContext('2d');
 
       if (chartSCurve) chartSCurve.destroy();
@@ -1834,7 +2051,7 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
           maintainAspectRatio:false,
           plugins:{ legend:{ labels:{ boxWidth:10, boxHeight:10 } } },
           scales:{
-            x:{ ticks:{ maxRotation:0, autoSkip:true, maxTicksLimit:12 } },
+            x:{ ticks:{ maxRotation:0, autoSkip:false, callback: dayTick } },
             y:{ beginAtZero:true, suggestedMax: Math.max(...PVc, ...EVc, ...ACc) * 1.15 || 1 }
           }
         }
@@ -1856,9 +2073,82 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
         },
         options:{
           responsive:true,
-          maintainAspectRatio:false,
-          cutout:'70%',
+          maintainAspectRatio:true,
+          aspectRatio: 1.6,
+          cutout:'65%',
           plugins:{ legend:{ position:'bottom' } }
+        }
+      });
+
+      // Cost by phase (bar)
+      const byPhase = {};
+      state.tasks.forEach(t=>{
+        const ph = t.phase || 'Sin fase';
+        byPhase[ph] = (byPhase[ph]||0) + Number(t.cost||0);
+      });
+      const phaseLabels = Object.keys(byPhase);
+      const phaseData = Object.values(byPhase);
+      const ctxPhase = document.getElementById('chartPhaseCost').getContext('2d');
+      if (chartPhaseCost) chartPhaseCost.destroy();
+      chartPhaseCost = new Chart(ctxPhase, {
+        type:'bar',
+        data:{ labels: phaseLabels, datasets:[{ label:'BAC', data: phaseData, backgroundColor:'rgba(37,99,235,.55)' }] },
+        options:{
+          responsive:true,
+          maintainAspectRatio:false,
+          plugins:{ legend:{ display:false } },
+          scales:{
+            x:{ ticks:{ autoSkip:false, maxRotation:45, minRotation:0 } },
+            y:{ beginAtZero:true, suggestedMax: Math.max(...phaseData, 1) * 1.2 }
+          }
+        }
+      });
+
+      // Status distribution
+      const byStatus = {};
+      state.tasks.forEach(t=>{
+        const status = t.status || 'Por liberar';
+        byStatus[status] = (byStatus[status]||0) + 1;
+      });
+      const ctxStatus = document.getElementById('chartStatus').getContext('2d');
+      if (chartStatus) chartStatus.destroy();
+      chartStatus = new Chart(ctxStatus, {
+        type:'doughnut',
+        data:{
+          labels: Object.keys(byStatus),
+          datasets:[{ data:Object.values(byStatus) }]
+        },
+        options:{
+          responsive:true,
+          maintainAspectRatio:true,
+          aspectRatio: 1.6,
+          cutout:'65%',
+          plugins:{ legend:{ position:'bottom' } }
+        }
+      });
+
+      // Daily cashflow (PV vs AC)
+      const ctxDaily = document.getElementById('chartDaily').getContext('2d');
+      if (chartDaily) chartDaily.destroy();
+      const pvMax = Math.max(...PV, 0);
+      const acMax = Math.max(...AC, 0);
+      chartDaily = new Chart(ctxDaily, {
+        type:'line',
+        data:{
+          labels,
+          datasets:[
+            { label:'PV diario', data: PV, tension:0.25, pointRadius:0, borderColor:'rgba(37,99,235,.9)' },
+            { label:'AC diario', data: AC, tension:0.25, pointRadius:0, borderColor:'rgba(220,38,38,.85)' }
+          ]
+        },
+        options:{
+          responsive:true,
+          maintainAspectRatio:false,
+          plugins:{ legend:{ labels:{ boxWidth:10, boxHeight:10 } } },
+          scales:{
+            x:{ ticks:{ autoSkip:false, callback: dayTick } },
+            y:{ beginAtZero:true, suggestedMax: Math.max(pvMax, acMax) * 1.2 || 1 }
+          }
         }
       });
 
@@ -2138,6 +2428,17 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
     /* ===========================
        Botones principales
        =========================== */
+
+    const startDateInput = document.getElementById('projectStartDate');
+    if (startDateInput && !startDateInput.value){
+      startDateInput.value = formatDateISO(new Date());
+    }
+    const nonWorkingInput = document.getElementById('nonWorkingDays');
+    if (nonWorkingInput && !nonWorkingInput.value){
+      const year = new Date().getFullYear();
+      nonWorkingInput.value = mexicoHolidays(year).join('\n');
+    }
+    document.getElementById('btnApplyStartDate')?.addEventListener('click', scheduleFromStartDate);
 
     document.getElementById('leanToggle')?.addEventListener('click', (e)=>{
       const btn = e.target.closest('button[data-mode]');
@@ -2558,6 +2859,7 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
     refreshAll();
 
   </script>
+  </div>
 </div>
 </body>
 </html>
