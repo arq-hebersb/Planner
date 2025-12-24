@@ -435,6 +435,21 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
       gap: 12px;
     }
+    .error-list{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .error-item{
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(220,38,38,.25);
+      background: rgba(254,226,226,.6);
+      color: #7f1d1d;
+      font-size: 12px;
+      font-weight: 700;
+    }
     .chart-card canvas{
       width:100% !important;
       height: 220px !important;
@@ -1024,6 +1039,10 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
           </div>
 
           <div class="panel-body">
+            <div class="error-list">
+              <div class="error-item" id="errorCost">Error 01: —</div>
+              <div class="error-item" id="errorWbs">Error 02: —</div>
+            </div>
             <div class="cards">
               <div class="card">
                 <div class="k">BAC Total</div>
@@ -1762,6 +1781,11 @@ $USER_NAME = $_SESSION['user_name'] ?? 'Heber';
       document.getElementById('kpiBAC').textContent = money(bacTotal);
       document.getElementById('kpiEV').textContent = money(evTotal);
       document.getElementById('kpiAC').textContent = money(acTotal);
+
+      const missingCost = state.tasks.filter(t=>Number(t.cost||0) <= 0).length;
+      const missingWbs = state.tasks.filter(t=>!String(t.wbs||'').trim()).length;
+      document.getElementById('errorCost').textContent = `Error 01: ${missingCost} actividades sin BAC`;
+      document.getElementById('errorWbs').textContent = `Error 02: ${missingWbs} actividades sin WBS`;
 
       const PV = seriesPV();
       const EV = seriesEV();
